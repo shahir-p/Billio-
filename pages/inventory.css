@@ -1,0 +1,294 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+body {
+    font-family: "Poppins", serif;
+}
+
+.navbar {
+    height: 80px;
+    width: 100%;
+    /* background-color: lightcoral; */
+    display: flex;
+    column-gap: 20px;
+    padding-left: 100px;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0px 0px 2px black;
+
+}
+
+.iconDiv {
+    width: 40px;
+    height: 40px;
+    /* background-color: green; */
+    cursor: pointer;
+
+}
+
+.iconDiv img {
+    width: 100%;
+    height: 100%;
+    background-position: center;
+}
+
+.searchbox {
+    
+    width: 380px;
+
+    height: 50px;
+    display: flex;
+    column-gap: 10px;
+  
+
+
+
+}
+#filter{
+    height: 100%;
+    border-radius: 10px;
+    padding-left: 8px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+#searchField {
+    height: 100%;
+    /* width: 100%; */
+    border-radius: 10px;
+    border: 1px solid;
+   
+}
+
+.navIcons {
+    display: flex;
+    column-gap: 20px;
+
+}
+
+#heading {
+    font-size: 25px;
+    font-weight: 500;
+}
+.headRow{
+    display: flex;
+}
+.addButton{
+    height:35px;
+    width: 70px;
+    background-color: #3dac35;
+    color: white;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 10px;
+    cursor: pointer;
+}
+.saveButton{
+    height:35px;
+    width: 70px;
+    background-color: #0879eb;
+    color: white;
+    border-radius: 5px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 10px;
+    cursor: pointer;
+    display: none;
+}
+
+.custBody {
+    margin: 10px 100px;
+}
+
+.listBox {
+    height: 60px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 0 10px;
+    font-weight: 600;
+    font-size: 22px;
+}
+
+/* .listItem {
+    background-color: lightblue;
+} */
+
+.genListContainer {
+
+
+    width: 100%;
+}
+
+.customer-item {
+    height: 60px;
+    width: 100%;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    padding: 0 10px;
+    margin-top: 10px;
+    font-size: 18px;
+    font-weight: 500;
+    /* background-color: beige; */
+}
+
+.customer-list {
+    display: flex;
+    font-size: 20px;
+    font-weight: 800;
+}
+
+
+
+/* .listBox div {
+    font-weight: 600;
+} */
+
+.listBox div,
+.customer-item div {
+    text-align: center;
+
+}
+
+.listBox img,
+.customer-item img {
+    width: 40px;
+}
+
+.row {
+    /* width: 100%; */
+    margin-top: 20px;
+    margin-bottom: 50px;
+    /* background-color: red; */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+
+}
+
+
+/* Container for toggle */
+.toggle-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: Arial, sans-serif;
+  }
+  
+  /* The toggle switch */
+  .toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 25px;
+  }
+  
+  /* Hide the default checkbox */
+  .toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  /* The slider */
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #1dab12;
+    border-radius: 25px;
+    transition: 0.4s;
+  }
+  
+  /* The slider when checked */
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 19px;
+    width: 19px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.4s;
+  }
+  
+  /* Toggle checked */
+  input:checked + .slider {
+    background-color: #c50404;
+  }
+  
+  input:checked + .slider:before {
+    transform: translateX(24px);
+  }
+  .homeBody {
+    /* flex-grow: 1; */
+    padding: 10px 10px;
+    display: flex;
+    flex-direction: column;
+    /* background-color: beige; */
+    margin:20px 50px;
+    /* height: 80vh; */
+}
+.topRow{
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+
+
+
+
+
+.tableContainer {
+    height: 550px;
+    max-height: 600px; /* Set the max height as needed */
+    overflow-y: auto;  /* Enable vertical scrolling */
+    border: 1px solid #ddd; /* Optional: Add a border for visibility */
+    padding: 10px;     /* Optional: Add some padding */
+   /* Optional: Add a background color */
+}
+
+.table th {
+    font-size: 15px;
+    font-weight: 600;
+}
+
+table tbody td input{
+    padding-left: 5px;
+}
+/* Set the height of the table rows */
+#itemTable tbody tr {
+    height: 20px;
+}
+
+/* Reduce padding and line height for inputs in the table */
+.form-control {
+    height: 20px;
+    padding: 2px 4px; /* Reduce padding */
+    font-size: 15px; /* Optional: Adjust font size */
+    line-height: 20px;
+    box-sizing: border-box;
+    border: none; /* Ensure consistent sizing */
+}
+
+/* Optional: Reduce button size for delete button */
+.btn-danger {
+    padding: 2px 6px;
+    font-size: 12px;
+    height: 20px;
+    line-height: 16px;
+}

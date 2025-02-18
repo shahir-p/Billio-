@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice A4 Canvas</title>
+    <link rel="stylesheet" href="./invoice.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+</head>
+
+<body>
+    <div class="a4-canvas">
+        <div class="a4show">
+            <div class="header">
+
+                <div class="companyDetails">
+                    <span class="heading">Company Name</span>
+                    <span class="subhead">Address</span>
+                    <span class="subhead">Phone</span>
+                </div>
+                <h1>INVOICE</h1>
+                <!-- <p>Company Name <span id="invoiceNO"></span></p>
+            <p>Date: <span id="invoiceDate"></span></p>
+            <p>Total Amount: <span id="totalAmount"></span></p>
+            <p>Balance Amount: <span id="balanceAmount"></span></p> -->
+            </div>
+            <!-- <span class="cheading to">To</span> -->
+            <div class="customerDetails">
+                <div class="cd1">
+                    
+                    <span class="csubhead" id="name"></span>
+                    <span class="csubhead" id="phone"></span>
+                    <span class="ccsubhead" id="trtype"></span>
+                    <span class="ccsubhead" id="trmode"></span>
+                </div>
+                <div class="cd1">
+
+                    <span class="csubhead" id="Date"></span>
+                    <span class="csubhead" id="invoiceNO"></span>
+                    
+
+                </div>
+            </div>
+            <div class=" tableOuter  mt-2">
+                
+                <table class="table table-bordered border-dark   mt-4">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th id="item">Item</th>
+                            <th>Unit Price</th>
+                            <th>Quantity</th>
+                            <th>amount</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Products will be added here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="summary-row d-flex justify-content-between align-items-start p-2 ">
+                <div class="labels">
+                    <div class="label"><strong>Total:</strong></div>
+                    <div class="label"><strong>Paid Amount:</strong></div>
+                    <div class="label"><strong>Balance:</strong></div>
+                </div>
+                <div class="values text-end">
+                    <div class="value" id="totalAmount">0.00</div>
+                    <div class="value" id="paidAmount">0.00</div>
+                    <div class="value" id="balanceAmount">0.00</div>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</body>
+<script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js";
+    import { getFirestore, collection, doc, getDocs } from "https://www.gstatic.com/firebasejs/9.17.1/firebase-firestore.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyBZ_mkqt1dB2_uLRGamOxxjcOjgxntL8gY",
+        authDomain: "mill-karathur-6756d.firebaseapp.com",
+        projectId: "mill-karathur-6756d",
+        storageBucket: "mill-karathur-6756d.appspot.com",
+        messagingSenderId: "304225841532",
+        appId: "1:304225841532:web:c09b203608227e991bb4f9",
+        measurementId: "G-VRXZKDPYPX",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Get invoiceNo from the URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const invoiceNo = urlParams.get('invoiceNo');
+    console.log(invoiceNo);
+    // Get invoice number from query parameter
+
+    document.getElementById("invoiceNO").textContent = "#" + invoiceNo;
+
+
+
+
+    async function searchInvoiceInAllDocs(invoiceNo) {
+        try {
+            const billsCollection = collection(db, "bills"); // Access the "bills" collection
+            const querySnapshot = await getDocs(billsCollection);
+
+            let matchingTransactions = [];
+            let matchingInvoices = [];
+
+            querySnapshot.forEach(docSnap => {
+                const docId = docSnap.id; // Auto-generated document ID
+                const data = docSnap.data();
+                const transactionHistory = data.transactionHistory || [];
+                const invoiceNumbers = data.invoiceNumbers || [];
+
+                // Find matches in both arrays
+                const matchedTransaction = transactionHistory.find(item => item.invoiceNo === invoiceNo);
+                const matchedInvoice = invoiceNumbers.find(item => item.invoiceNo === invoiceNo);
+
+                // Collect results
+                if (matchedTransaction) {
+                    matchingTransactions.push({
+                        docId, // Include the document ID
+                        ...matchedTransaction
+                    });
+                }
+                if (matchedInvoice) {
+                    matchingInvoices.push({
+
+                        docId, // Include the document ID
+                        ...matchedInvoice
+                    });
+                }
+            });
+
+            // Log results
+            console.log("Matching Transactions:", matchingTransactions);
+            console.log("Matching Invoices:", matchingInvoices);
+
+            const date = matchingInvoices[0].date;
+            const name = matchingTransactions[0].customerName
+            const phone = matchingTransactions[0].phoneNumber
+            const items = matchingInvoices[0].items;
+
+            const balance = matchingTransactions[0].balanceAmount
+            const paid = matchingTransactions[0].paidAmount
+            const total = matchingTransactions[0].totalAmount
+            const trmode = matchingTransactions[0].transactionMode
+            const trtype = matchingInvoices[0].transactionType
+            // document.getElementById("invoiceNO").textContent =
+
+            document.getElementById("Date").textContent = date
+            document.getElementById("name").textContent = name
+            document.getElementById("phone").textContent = phone
+            document.getElementById("trmode").textContent ="Mode :" +trmode
+            document.getElementById("trtype").textContent =" Type :" + trtype
+            document.getElementById("totalAmount").textContent = total + ".00"
+            document.getElementById("paidAmount").textContent = paid + ".00"
+            document.getElementById("balanceAmount").textContent = balance + ".00"
+
+            console.log(items);
+
+            if (matchingInvoices.length > 0) {
+                const items = matchingInvoices[0].items; // Get the items array
+                const productTableBody = document.getElementById("productTableBody");
+
+                if (productTableBody && Array.isArray(items)) {
+                    // Clear any existing rows
+                    productTableBody.innerHTML = "";
+
+                    // Loop through items and add rows to the table
+                    items.forEach((item, index) => {
+                        const row = document.createElement("tr");
+
+                        // Create cells for S/N, Item, Unit Price, Quantity, and Amount
+                        const serialCell = document.createElement("td");
+                        serialCell.textContent = index + 1;
+
+                        const itemCell = document.createElement("td");
+                        itemCell.textContent = item.itemName || "N/A"; // Replace 'name' with the key for the item name in your data
+
+                        const unitPriceCell = document.createElement("td");
+                        unitPriceCell.textContent = item.unitPrice || "0.00";
+
+                        const quantityCell = document.createElement("td");
+                        quantityCell.textContent = item.quantity || "0";
+
+                        const amountCell = document.createElement("td");
+                        const amount = (item.unitPrice || 0) * (item.quantity || 0);
+                        amountCell.textContent = amount.toFixed(2);
+
+                        // Append cells to the row
+                        row.appendChild(serialCell);
+                        row.appendChild(itemCell);
+                        row.appendChild(unitPriceCell);
+                        row.appendChild(quantityCell);
+                        row.appendChild(amountCell);
+
+                        // Append the row to the table body
+                        productTableBody.appendChild(row);
+                    });
+                } else {
+                    console.error("Items array is not available or is not valid.");
+                }
+            } else {
+                console.log("No matching invoices found.");
+            }
+
+        } catch (error) {
+            console.error("Error searching invoice:", error);
+        }
+    }
+
+    // Replace "INV-002" with the invoice number you want to search for
+    searchInvoiceInAllDocs(invoiceNo);
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+
+</html>

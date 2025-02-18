@@ -1,0 +1,142 @@
+body {
+    font-family: Arial, sans-serif;
+    margin-top: 200px;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: #f4f4f9;
+}
+
+.a4-canvas {
+    
+    width: 794px;
+    /* A4 width in pixels at 96 DPI */
+    height: 1123px;
+    /* height: 800px; */
+    background-color: white;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    margin-top: 350px;
+   
+    
+}
+
+h1 {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+p {
+    font-size: 16px;
+}
+.a4show{
+    height: 95%;
+    margin: 20px;
+    border: 1px solid black;
+}
+.header{
+    height: 12%;
+    width: 100%;
+    /* background-color: rgb(237, 207, 207); */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid black;
+    
+}
+.header h1{
+    padding-right: 20px;
+}
+.companyDetails{
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.5;
+}
+.heading{
+    font-size: 22px;
+    font-weight: 500;
+}
+.subhead{
+    font-size: 18px;
+   
+}
+.customerDetails{
+    height: 10%;
+    width: 100%;
+    /* background-color: rgb(204, 229, 194); */
+    display: flex;
+    justify-content: space-between;
+    /* border-bottom: 1px solid black; */
+    align-items: center;
+    padding-top: 10px;
+
+}
+.to{
+    padding: 5px 20px;
+    font-size:20px;
+}
+.cd1{
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    line-height: 1.5;
+}
+.cheading{
+    font-size: 18px;
+    font-weight: 500;
+}
+.csubhead{
+    font-size: 18px;
+    font-weight: 500;
+}
+
+table{
+    width: 100%;
+    height: 500px;
+}
+
+ tr{
+    border: 1px solid black;
+}
+#item{
+    width: 300px;
+}
+.summary-row {
+    display: flex;
+    /* justify-content: end; */
+    align-items: flex-start;
+    /* padding: 10px 0; */
+    /* background-color: lightblue; */
+}
+
+.labels {
+    width: 90%; /* Adjust as needed to align with the Quantity column */
+    text-align: right; /* Align text to the left */
+    font-size: 18px;
+}
+
+.values {
+    width: 15%; 
+    display: flex;
+    flex-direction: column;/* Adjust as needed to align with the Amount column */
+    justify-content: center; 
+    align-items: start;
+    padding-left: 10px;/* Align text to the right */
+    font-size: 18px;
+    font-weight: 500;
+    /* background-color: red; */
+ 
+}
+
+.label, .value {
+    padding: 5px 0;
+}
+
+/* Optional styling for spacing */
+
+
+.text-end {
+    text-align: start;
+}

@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Customer Details</title>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js" type="module"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js" type="module"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        body {
+            font-family: "Poppins", serif;
+        }
+
+        .topNavigation {
+            width: 100%;
+            height: 60px;
+            /* margin-top: 20px; */
+            margin-bottom: 20px;
+            /* background-color: red; */
+            display: flex;
+
+            justify-content: space-between;
+            align-items: center;
+
+
+
+        }
+
+        .id {
+            width: 400px;
+            height: 100%;
+            /* background-color: green; */
+            display: flex;
+            justify-content: start;
+            align-items: center;
+        }
+
+        .payButton {
+            width: 220px;
+            height: 100%;
+            background-color: green;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 15px;
+            color: white;
+            font-size: 22px;
+            cursor: pointer;
+        }
+
+        .properties {
+            line-height: 1.5;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal {
+            overflow-y: visible !important;
+            /* Ensure dropdown options are not clipped */
+        }
+
+        .payButton:hover {
+            background-color: rgb(59, 135, 59);
+
+        }
+
+        .tableOuter {
+            border: 1px solid black;
+            border-radius: 20px;
+            width: 49%;
+            column-gap: 20px;
+        }
+
+        thead tr th {
+            font-weight: 600;
+        }
+
+        .totalAmount {
+            background-color: black;
+            color: white;
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        .totalPaid {
+            background-color: rgb(69, 171, 239);
+            color: white;
+            padding: 8px;
+            border-radius: 10px;
+        }
+
+        .balanceAmount {
+            background-color: rgb(241, 49, 49);
+            padding: 8px;
+            border-radius: 10px;
+            color: white;
+        }
+
+        .gridBox {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+        }
+
+        @media (max-width: 992px) {
+            .properties {
+                line-height: 1.5;
+                display: flex;
+                flex-direction: column;
+                justify-content: space-between;
+            }
+
+            .gridBox {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-around;
+                width: 100%;
+            }
+
+            .tableOuter {
+                border: 1px solid black;
+                border-radius: 20px;
+                width: 100%;
+            }
+
+            .colorBox {
+                text-align: center;
+            }
+        }
+
+        @media (max-width: 460px) {
+            thead tr th {
+                font-weight: 500;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container mt-5">
+        <div id="customAlert" style="
+    display: none; 
+    position: fixed; 
+    top: 20px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    background-color: #007bff; 
+    color: white; 
+    padding: 10px 20px; 
+    border-radius: 5px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    font-size: 14px; 
+    z-index: 100000000;">
+        </div>
+        <div class="topNavigation">
+            <div class="id">
+                <img width="30px" height="30px" src="./icons/back.png" alt="" id="navigate">
+                <h2 class="ms-4">Customer Details</h2>
+            </div>
+            <div class="payButton" id="payButton">
+                Pay
+            </div>
+
+        </div>
+
+        <div class="properties">
+            <div>
+                <h4 class="mt-2">Name: <span id="customerName">Loading...</span></h4>
+
+                <h5 class="mt-">Phone Number : <span id="phoneNumber">Loading...</span></h5>
+
+            </div>
+            <div class="colorBox">
+
+                <h5 class="mt-2 totalAmount">Total Amount : <span id="totalAmount">Loading...</span></h5>
+                <h5 class="mt-2 totalPaid">Paid Amount : <span id="totalPaid">Loading...</span></h5>
+                <h5 class="mt-2 balanceAmount">Balance Amount : <span id="balanceAmount">Loading...</span></h5>
+            </div>
+
+
+
+        </div>
+
+        <div class=" mt-3 gridBox">
+            <div class=" tableOuter  p-2 mt-2">
+                <h5 class="">Product Items :</h5>
+                <table class="table table-bordered border   mt-4">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Date</th>
+                            <th>Invoice No</th>
+                            <th></th>
+
+                        </tr>
+                    </thead>
+                    <tbody id="productTableBody">
+                        <!-- Products will be added here -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="history" class=" tableOuter  mt-2 p-2 ">
+                <h5 class="">Payment History :</h5>
+                <table class="table table-bordered border  mt-4">
+                    <thead>
+                        <tr>
+                            <th>S/N</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Paid Amount</th>
+                            <th>Mode</th>
+                        </tr>
+                    </thead>
+                    <tbody id="paymentHistoryTableBody">
+
+                        <!-- Payment history will be added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <!-- delete model -->
+    <!-- Confirmation Modal -->
+
+
+    <!-- Pay Modal -->
+    <div class="modal fade" tabindex="-1" id="payModal" aria-labelledby="payModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h5 class="modal-title" id="payModalLabel">Enter Payment</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <!-- Modal Body -->
+                <div class="modal-body">
+                    <h6 class="mb-3">Balance Amount: <span id="modalBalanceAmount" class="fw-bold">0</span></h6>
+                    <div class="mb-3">
+                        <label for="transactionMode" class="form-label">Transaction Mode:</label>
+                        <select id="paytransactionMode" class="form-select" required>
+                            <option value="cash">Cash</option>
+                            <option value="UPI">UPI</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="paymentAmount" class="form-label">Payment Amount:</label>
+                        <input type="number" id="paymentAmount" class="form-control" placeholder="Enter payment amount"
+                            required>
+                    </div>
+                </div>
+                <!-- Modal Footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="confirmPayment">Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+        import { getFirestore, collection, query, where, getDocs, updateDoc, doc, arrayUnion, deleteDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBZ_mkqt1dB2_uLRGamOxxjcOjgxntL8gY",
+            authDomain: "mill-karathur-6756d.firebaseapp.com",
+            projectId: "mill-karathur-6756d",
+            storageBucket: "mill-karathur-6756d.appspot.com",
+            messagingSenderId: "304225841532",
+            appId: "1:304225841532:web:c09b203608227e991bb4f9",
+            measurementId: "G-VRXZKDPYPX",
+        };
+
+        // Initialize Firebase and Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Get the customer name from the URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const customerName = urlParams.get('customerName');
+
+        document.getElementById("customerName").textContent = customerName;
+
+        let customerDocId = null;
+        let currentBalance = 0;
+
+        let customerData = null; // Declare a global variable to store customer data
+
+        async function fetchCustomerDetails() {
+            try {
+                const customerRef = collection(db, "bills");
+                const nameQuery = query(customerRef, where("customerName", "==", customerName));
+                const querySnapshot = await getDocs(nameQuery);
+
+                if (!querySnapshot.empty) {
+                    const customerDoc = querySnapshot.docs[0];
+                    customerDocId = customerDoc.id;
+                    customerData = customerDoc.data(); // Assign data to the global variable
+
+                    // Log the customer data
+                    console.log("Customer Data:", customerData.transactionHistory);
+                    const transactionHistory = customerData.transactionHistory || [];
+
+                    const totalPaid = customerData.totalPaid || 0;
+                    const totalAmount = customerData.totalAmount || 0;
+                    currentBalance = customerData.balanceAmount || totalAmount - totalPaid;
+                    const numberPhone = customerData.phoneNumber;
+
+                    document.getElementById("totalPaid").textContent = totalPaid;
+                    document.getElementById("totalAmount").textContent = totalAmount;
+                    document.getElementById("balanceAmount").textContent = currentBalance;
+                    document.getElementById("phoneNumber").textContent = numberPhone;
+
+                    const payButton = document.getElementById('payButton');
+                    if (currentBalance === 0) {
+                        payButton.style.display = "none";
+                    }
+
+                    // Display invoices instead of products
+                    if (customerData.invoiceNumbers && customerData.invoiceNumbers.length > 0) {
+                        displayInvoices(customerData.invoiceNumbers);
+                    } else {
+                        console.log("No invoices found.");
+                        document.getElementById("productTableBody").innerHTML = "<tr><td colspan='4'>No invoices found</td></tr>";
+                    }
+                    // Call displayPaymentHistory here
+                    if (customerData.transactionHistory && customerData.transactionHistory.length > 0) {
+                        displayPaymentHistory(customerData.transactionHistory);
+                    } else {
+                        console.log("No transaction history available.");
+                        document.getElementById("paymentHistoryTableBody").innerHTML = "<tr><td colspan='5'>No payment history found</td></tr>";
+                    }
+
+                } else {
+                    console.error("Customer not found");
+                }
+            } catch (error) {
+                console.error("Error fetching customer data: ", error);
+            }
+        }
+
+        function displayInvoices(invoiceNumbers) {
+            const productTableBody = document.getElementById("productTableBody");
+            productTableBody.innerHTML = "";
+
+            if (!invoiceNumbers || invoiceNumbers.length === 0) {
+                productTableBody.innerHTML = "<tr><td colspan='4'>No invoices found</td></tr>";
+                return;
+            }
+
+            invoiceNumbers.forEach((invoice, index) => {
+                const row = document.createElement("tr");
+                const invoiceDate = invoice.date || "N/A"; // "11-02-2025" format string
+                const invoiceNo = invoice.invoiceNo || "N/A"; // "INV-002" format string
+
+                row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${invoiceDate}</td>
+            <td>${invoiceNo}</td>
+             <td><button class="btn btn-primary btn-sm view-button" data-invoice-no="${invoiceNo}">View</button></td>
+
+        `;
+                productTableBody.appendChild(row);
+            });
+        }
+
+
+
+
+
+
+        // Function to show/hide the Pay/Delete buttons
+
+
+
+        function displayPaymentHistory(transactionHistory) {
+            const paymentHistoryTableBody = document.getElementById("paymentHistoryTableBody");
+            paymentHistoryTableBody.innerHTML = ""; // Clear the table body
+
+            if (!transactionHistory || transactionHistory.length === 0) {
+                // If no transaction history is found
+                paymentHistoryTableBody.innerHTML = "<tr><td colspan='5'>No payment history found</td></tr>";
+                console.log("Transaction history is empty or undefined.");
+                return;
+            }
+
+            console.log("Transaction History:", transactionHistory);
+
+            transactionHistory.forEach((transaction, index) => {
+                const row = document.createElement("tr");
+
+                // Parse the string timestamp into a Date object
+                try {
+                    const timestampString = transaction.timestamp;
+                    const timestamp = new Date(timestampString);
+
+                    if (isNaN(timestamp)) {
+                        throw new Error("Invalid timestamp format");
+                    }
+
+                    // Format the date manually to ensure consistency
+                    const day = String(timestamp.getDate()).padStart(2, '0'); // Get day (2 digits)
+                    const month = String(timestamp.getMonth() + 1).padStart(2, '0'); // Get month (2 digits)
+                    const year = timestamp.getFullYear(); // Get full year
+                    const date = `${day}/${month}/${year}`; // Format in dd/mm/yyyy
+
+                    // Format the time
+                    const time = timestamp.toLocaleTimeString();
+
+                    // Add the row data
+                    row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${date}</td>
+                <td>${time}</td>
+                <td>${transaction.paidAmount}</td>
+                <td>${transaction.transactionMode}</td>
+            `;
+
+                    paymentHistoryTableBody.appendChild(row);
+                } catch (error) {
+                    console.error("Error parsing timestamp:", transaction.timestamp, error);
+                }
+            });
+        }
+
+
+
+
+        document.getElementById("payButton").addEventListener("click", () => {
+            document.getElementById("modalBalanceAmount").textContent = currentBalance;
+            document.getElementById("paymentAmount").setAttribute("max", currentBalance);
+            document.getElementById("paymentAmount").value = ""; // Clear the input field
+
+            const modal = new bootstrap.Modal(document.getElementById("payModal"));
+            modal.show();
+        });
+
+        document.getElementById("confirmPayment").addEventListener("click", async () => {
+            const paymentAmount = parseFloat(document.getElementById("paymentAmount").value);
+            const transactionMode = document.getElementById("paytransactionMode").value; // Use the correct ID from HTML
+
+            if (isNaN(paymentAmount) || paymentAmount <= 0 || paymentAmount > currentBalance) {
+                showAlert("Please enter a valid amount up to the balance amount.", 2500);
+                return;
+            }
+
+            try {
+                const customerRef = doc(db, "bills", customerDocId);
+                const currentPaid = parseFloat(document.getElementById("totalPaid").textContent);
+
+                const newPaid = currentPaid + paymentAmount;
+                const newBalance = currentBalance - paymentAmount;
+
+
+                // Prepare the new transaction entry
+                const transactionEntry = {
+                    paidAmount: paymentAmount,
+                    timestamp: new Date().toISOString(),
+                    transactionMode: transactionMode, // Correct reference
+                };
+
+                // Update Firestore document: add to transactionHistory, update totalPaid and balanceAmount
+                await updateDoc(customerRef, {
+                    totalPaid: newPaid,
+                    balanceAmount: newBalance,
+                    transactionHistory: arrayUnion(transactionEntry), // Use arrayUnion from Firestore
+                });
+
+                console.log("Payment updated successfully!");
+                location.reload();
+            } catch (error) {
+                console.error("Error updating payment: ", error);
+                alert("Error updating payment, contact Code114. @ 9526718126");
+            }
+        });
+
+        document.querySelector("table").addEventListener("click", event => {
+            if (event.target.classList.contains("view-button")) {
+                const invoiceNo = event.target.getAttribute("data-invoice-no");
+                window.location.href = `invoice.html?invoiceNo=${invoiceNo}`;
+            }
+        });
+
+
+
+        const showAlert = (message, duration = 3000) => {
+            const alertBox = document.getElementById("customAlert");
+            alertBox.textContent = message;
+            alertBox.style.display = "block";
+
+            // Hide the alert after the specified duration
+            setTimeout(() => {
+                alertBox.style.display = "none";
+            }, duration);
+        };
+
+
+        fetchCustomerDetails();
+        navigate.addEventListener("click", () => {
+            window.history.back();
+        });
+
+    </script>
+
+</body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</html>

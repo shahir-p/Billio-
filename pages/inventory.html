@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./icons/inventory-management.png" type="image/x-icon">
+    <title>Inventory</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="./inventory.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="navIcons">
+            <div class="iconDiv"><img src="./icons/home.png" title="home" onclick="home()"></div>
+            <div class="iconDiv"><img src="./icons/new bill.png" title="new bill" onclick="newBill()"></div>
+            <div class="iconDiv"><img src="./icons/ledger.png" title="ledger" onclick="ledger()"></div>
+            <div class="iconDiv"><img src="./icons/customer nav.png" title="customers" onclick="customers()"></div>
+            <div class="iconDiv"><img src="./icons/inventory-management.png" title="store" onclick="inventory()"></div>
+            <div class="iconDiv"><img src="./icons/debt.png" title="debit" onclick=""></div>
+            <div class="iconDiv"><img src="./icons/overview nav.png" title="overviw" onclick=""></div>
+            <div class="iconDiv"><img src="./icons/info.png" title="info" onclick=""></div>
+            <div class="iconDiv"><img src="./icons/logout.png" title="logout" onclick=""></div>
+
+        </div>
+        <div class="searchbox ">
+            <div class="filterBox">
+                <select id="filter" required>
+                    <option value="all">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="cleared">Cleared</option>
+            </div>
+            <input type="text" placeholder="&#128270;Enter Customer Name " id="searchField">
+        </div>
+
+
+
+    </nav>
+    <div class="homeContainer">
+        <div id="customAlert" style="
+    display: none; 
+    position: fixed; 
+    top: 20px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    background-color: #3978de; 
+    color: white; 
+    padding: 10px 20px; 
+    border-radius: 5px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    font-size: 14px; 
+    z-index: 1000;">
+        </div>
+        <!-- Fixed billRow -->
+
+        <div class="homeBody">
+            <!-- Form to add a new product -->
+            <div class="topRow">
+                <div class="headRow">
+                    <span id="heading">Inventory</span>
+                    <div class="addButton">Add +</div>
+
+
+                </div>
+                <div class="saveButton" id="saveButton">Save</div>
+                <div class="toggle-container">
+                    <span id="status">Read Mode</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-button">
+                        <span class="slider"></span>
+                    </label>
+
+                </div>
+            </div>
+            <div class="tableContainer">
+                <table class="table table-bordered" id="itemTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">S/N</th>
+                            <th style="width: 10%;">Item Code</th>
+                            <th style="width: 25%;">Item Name</th>
+                            <th style="width: 10%;">Total Qty</th>
+                            <th style="width: 10%;">Current Qty</th>
+                            <th style="width: 10%;">Unit</th>
+                            <th style="width: 15%;">MRP</th>
+                            <th style="width: 10%;">Expiry</th>
+                            <th style="width: 5%;"></th>
+                        </tr>
+                    <tbody>
+                        <!-- Rows will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+
+
+</body>
+<script>
+    const addButton = document.querySelector('.addButton');
+    const tableBodyy = document.querySelector('#itemTable tbody');
+    const saveButton = document.getElementById('saveButton');
+    const toggleButton = document.getElementById('toggle-button');
+    const statusText = document.getElementById('status');
+    let newRowAdded = false; // Flag to track if a new row has been added
+
+    // Hide the save button initially
+    saveButton.style.display = "none";
+
+    // Add event listener to the toggle button for edit/read mode
+    toggleButton.addEventListener('change', () => {
+        if (toggleButton.checked) {
+            statusText.textContent = 'Edit Mode';
+            saveButton.style.display = "flex"; // Hide save button initially in Edit Mode
+        } else {
+            statusText.textContent = 'Read Mode';
+            saveButton.style.display = "none";
+        }
+    });
+
+
+    // Navigation functions
+    function home() {
+        window.location.href = "./homePage.html";
+    }
+    function newBill() {
+        window.open('./bill.html', '_blank');
+    }
+    function ledger() {
+        window.location.href = "./ledger.html";
+    }
+    function customers() {
+        window.location.href = "./customers.html";
+    }
+    function inventory() {
+        window.location.href = "./inventory.html";
+    }
+
+</script>
+<script type="module">
+    // Firebase Imports
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
+    import { getFirestore, doc, setDoc, collection, getDocs, getDoc } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+        apiKey: "AIzaSyB5Dll51Ier9CDbYfS5D_VBuZCVZdz2wS0",
+        authDomain: "full-bill.firebaseapp.com",
+        projectId: "full-bill",
+        storageBucket: "full-bill.firebasestorage.app",
+        messagingSenderId: "866610694066",
+        appId: "1:866610694066:web:af68a003b7fa00fe7c86ab"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    const tableBody = document.querySelector("#itemTable tbody");
+    const addNewRowButton = document.getElementById("addButton");
+    const saveButton = document.getElementById("saveButton");
+
+    // Fetch data from Firestore
+    // Fetch data from Firestore
+    // Fetch data from Firestore
+    // Fetch data from Firestore
+    // Fetch data from Firestore
+    async function fetchData() {
+        const inventoryCollection = collection(db, "inventory");
+        try {
+            const querySnapshot = await getDocs(inventoryCollection);
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                addRowToTable(data);
+            });
+        } catch (error) {
+            console.error("Error fetching data from Firestore:", error);
+        }
+    }
+
+    // Add a row to the table
+    function addRowToTable(data = {}) {
+        const newRow = document.createElement("tr");
+        newRow.setAttribute("data-modified", "false"); // Flag to track if the row is modified
+
+        newRow.innerHTML = `
+    <td></td>
+    <td><input type="text" class="form-control item-code" value="${data.itemCode || ''}" /></td>
+    <td><input type="text" class="form-control" value="${data.itemName || ''}" /></td>
+    <td><input type="number" class="form-control" value="${data.totalQty || ''}" /></td>
+    <td><input type="number" class="form-control" value="${data.currentQty || data.totalQty || ''}" readonly /></td>
+    <td>
+      <select class="form-control">
+        <option value="Pcs" ${data.unit === 'Pcs' ? 'selected' : ''}>Pcs</option>
+        <option value="Dozen" ${data.unit === 'Dozen' ? 'selected' : ''}>Dozen</option>
+        <option value="Liter" ${data.unit === 'Liter' ? 'selected' : ''}>Liter</option>
+        <option value="Box" ${data.unit === 'Box' ? 'selected' : ''}>Box</option>
+      </select>
+    </td>
+    <td><input type="number" class="form-control" step="0.01" value="${data.mrp || ''}" /></td>
+    <td><input type="date" class="form-control" value="${data.expiry ? new Date(data.expiry).toISOString().split('T')[0] : ''}" /></td>
+    <td>
+      <button class="btn btn-danger btn-sm delete-row">Delete</button>
+    </td>
+  `;
+
+        tableBody.appendChild(newRow);
+        updateSerialNumbers();
+
+        // Track changes to the row inputs
+        newRow.querySelectorAll("input, select").forEach(input => {
+            input.addEventListener("change", () => {
+                newRow.setAttribute("data-modified", "true"); // Mark the row as modified
+            });
+        });
+    }
+
+    // Update serial numbers
+    function updateSerialNumbers() {
+        const rows = tableBody.querySelectorAll("tr");
+        rows.forEach((row, index) => {
+            row.children[0].textContent = index + 1;
+        });
+    }
+
+    // Ensure item code is unique
+    async function isItemCodeUnique(itemCode, skipRow = null) {
+        const rows = tableBody.querySelectorAll("tr");
+        for (const row of rows) {
+            if (row !== skipRow) {
+                const existingItemCode = row.querySelector(".item-code").value.trim();
+                if (existingItemCode === itemCode) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    // Add a new blank row
+    addButton.addEventListener("click", () => {
+        addRowToTable();
+        saveButton.style.display = "flex";
+    });
+
+    // Save data to Firestore
+    saveButton.addEventListener("click", async () => {
+        const rows = tableBody.querySelectorAll("tr");
+        const dataToSave = [];
+
+        for (const row of rows) {
+            const inputs = row.querySelectorAll("input, select");
+            const [itemCode, itemName, totalQty, currentQty, unit, mrp, expiry] = inputs;
+
+            // Check if the row has been modified or is new
+            if (row.getAttribute("data-modified") === "true") {
+                // Ensure item code is unique
+                if (!(await isItemCodeUnique(itemCode.value.trim(), row))) {
+                    alert(`Item code "${itemCode.value.trim()}" already exists in the table. Please change it.`);
+                    return;
+                }
+
+                // Add modified or new row to the data to save
+                if (itemCode.value && itemName.value) {
+                    dataToSave.push({
+                        itemCode: itemCode.value.trim(),
+                        itemName: itemName.value.trim(),
+                        totalQty: parseFloat(totalQty.value),
+                        currentQty: parseFloat(currentQty.value),
+                        unit: unit.value.trim(),
+                        mrp: parseFloat(mrp.value),
+                        expiry: expiry.value ? new Date(expiry.value).toISOString() : null,
+                    });
+                }
+
+                // Mark the row as saved
+                row.setAttribute("data-modified", "false");
+            }
+        }
+
+        if (dataToSave.length === 0) {
+            alert("No new or modified rows to save.");
+            return;
+        }
+
+        try {
+            // Save only modified or new data to Firestore
+            for (const item of dataToSave) {
+                const docRef = doc(db, "inventory", item.itemCode);
+                await setDoc(docRef, item);
+            }
+            alert("Data saved successfully.");
+            location.reload(); 
+        } catch (error) {
+            console.error("Error saving data:", error);
+            alert("Failed to save data. Check console for details.");
+        }
+    });
+
+    // Fetch data on page load
+    window.onload = fetchData;
+
+
+
+</script>
+
+
+</html>
