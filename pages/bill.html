@@ -30,7 +30,7 @@
         <div class="iconDiv"><img src="./icons/overview nav.png" title="overviw" onclick=""></div>
         <div class="iconDiv"><img src="./icons/info.png" title="info" onclick=""></div>
         <div class="iconDiv"><img src="./icons/logout.png" title="logout" onclick=""></div>
-        
+
 
     </nav>
     <div class="homeContainer">
@@ -225,6 +225,7 @@
                 updateDoc,
                 doc,
                 increment,
+                getDoc
             } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
 
             // Firebase configuration
@@ -240,6 +241,78 @@
             // Initialize Firebase
             const app = initializeApp(firebaseConfig);
             const db = getFirestore(app);
+
+
+
+            window.fetchSuggestions = async (input, field) => {
+                if (!input || !field) return [];
+
+                try {
+                    const inventoryRef = collection(db, "inventory");
+                    const q = query(inventoryRef, where(field, ">=", input), where(field, "<=", input + "\uf8ff")); // Prefix match query
+                    const querySnapshot = await getDocs(q);
+
+                    const suggestions = [];
+                    querySnapshot.forEach((doc) => {
+                        suggestions.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    return suggestions;
+                } catch (error) {
+                    console.error("Error fetching suggestions:", error);
+                    return [];
+                }
+            };
+
+
+
+
+            window.updateStock = async (itemCode, quantity) => {
+                try {
+                    const itemDocRef = doc(db, "inventory", itemCode);
+                    const itemDocSnap = await getDoc(itemDocRef);
+
+                    if (itemDocSnap.exists()) {
+                        const currentStock = itemDocSnap.data().stock || 0;
+
+                        if (currentStock < quantity) {
+                            alert("Insufficient stock available!");
+                            return;
+                        }
+
+                        const newStock = currentStock - quantity;
+
+                        await updateDoc(itemDocRef, { stock: newStock });
+                        console.log(`Stock updated for ${itemCode}: ${newStock}`);
+                    } else {
+                        alert(`Item with code ${itemCode} not found in the database.`);
+                    }
+                } catch (error) {
+                    console.error("Error updating stock:", error);
+                }
+            };
+
+            const saveData = async () => {
+                const rows = document.querySelectorAll("#itemTable tbody tr");
+
+                for (const row of rows) {
+                    const itemCode = row.querySelector(".item-code-input").value.trim();
+                    const quantity = parseInt(row.querySelector(".qty-input").value.trim(), 10);
+
+                    if (itemCode && quantity > 0) {
+                        // Call the Firestore stock update function
+                        await window.updateStock(itemCode, quantity);
+                    }
+                }
+
+                alert("Data saved and stock updated successfully!");
+            };
+
+            
+      
+
+
+
 
             let customers = [];
 
@@ -443,15 +516,15 @@
                             invoiceNumbers: [
                                 {
                                     invoiceNo: newInvoiceNo,
-                                transactionType,
-                                date,
-                                items: newItems,
-                                paidAmount: initialPayment,
-                                transactionMode,
-                                totalAmount,
-                                balanceAmount,
-                                customerName,
-                                phoneNumber,
+                                    transactionType,
+                                    date,
+                                    items: newItems,
+                                    paidAmount: initialPayment,
+                                    transactionMode,
+                                    totalAmount,
+                                    balanceAmount,
+                                    customerName,
+                                    phoneNumber,
                                 },
                             ],
                             totalAmount,
@@ -461,11 +534,14 @@
                         };
 
                         await addDoc(billsRef, data);
+
+
                         // showAlert("Transaction saved successfully!", 3000);
                     }
-
-                    window.pdfload();
-                    location.reload();
+                    saveData();
+                    
+                    // window.pdfload();
+                    // location.reload();
                 } catch (error) {
                     console.error("Error saving/updating transaction:", error);
                     showAlert("Error! Please contact support.", 5000);
@@ -486,10 +562,420 @@
             // Add event listener for the save button
             document.getElementById("creditsave").addEventListener("click", () => {
                 validateAndSaveTransaction();
+
             });
 
         </script>
 
+
+        <script>
+
+
+
+            // date
+            const dateField = document.getElementById('dateField');
+
+            // Function to format a date object to 'dd-mm-yyyy'
+            const formatDate = (date) => {
+                const day = String(date.getDate()).padStart(2, '0');
+                const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
+                const year = date.getFullYear();
+                return `${day}-${month}-${year}`;
+            };
+
+            // Function to parse 'dd-mm-yyyy' to a Date object
+            const parseDate = (dateStr) => {
+                const [day, month, year] = dateStr.split('-').map(Number);
+                return new Date(year, month - 1, day); // Months are 0-indexed
+            };
+
+            // Set the default value to today's date
+            const today = new Date();
+            dateField.value = formatDate(today);
+
+            // Enable editing on click
+            dateField.addEventListener('click', () => {
+                dateField.removeAttribute('readonly'); // Allow editing
+
+                // Open a date picker by temporarily adding an input of type 'date'
+                const datePicker = document.createElement('input');
+                datePicker.type = 'date';
+                datePicker.style.position = 'absolute';
+                datePicker.style.visibility = 'hidden'; // Hide the native date picker
+                document.body.appendChild(datePicker);
+
+                // Set the date picker value to the currently displayed date
+                const currentDate = parseDate(dateField.value);
+                datePicker.value = currentDate.toISOString().split('T')[0]; // Format as 'yyyy-mm-dd'
+
+                datePicker.addEventListener('change', () => {
+                    const selectedDate = new Date(datePicker.value);
+                    dateField.value = formatDate(selectedDate); // Update field in 'dd-mm-yyyy' format
+                    document.body.removeChild(datePicker); // Remove the temporary date picker
+                    // dateField.setAttribute('readonly', flase); // Make it readonly again
+                });
+
+                // Remove the date picker if the user clicks elsewhere
+                datePicker.addEventListener('blur', () => {
+                    document.body.removeChild(datePicker);
+                    // dateField.setAttribute('readonly', true); // Reapply readonly
+                });
+
+                datePicker.click(); // Trigger the date picker
+            });
+
+            // Restore readonly attribute on blur
+            dateField.addEventListener('blur', () => {
+                if (!dateField.value) {
+                    dateField.value = formatDate(today); // Reset to today's date if empty
+                }
+                dateField.setAttribute('readonly', true);
+            });
+
+
+
+
+
+
+
+
+
+
+            additem = () => {
+                addRow();
+            }
+
+
+
+            // const addItemButton = document.getElementById('addItemButton');
+            const itemTable = document.getElementById('itemTable').querySelector('tbody');
+            maxrow = 15
+            let rowCount = 0;
+
+            // Enable Add Item button only if the current row is complete
+            // const enableAddButton = () => {
+            //     const rows = itemTable.querySelectorAll('tr');
+            //     const lastRow = rows[rows.length - 1];
+            //     const inputs = lastRow.querySelectorAll('input:not([readonly])');
+            //     const allFilled = Array.from(inputs).every(input => input.value.trim() !== "");
+            //     addItemButton.disabled = !allFilled;
+            // };
+
+            // Add a new row to the table
+            const addRow = () => {
+                rowCount++;
+                const row = document.createElement("tr");
+                row.innerHTML = `
+        <td>${rowCount}</td>
+        <td>
+            <input type="number" class="item-code-input" list="item-code-suggestions" placeholder="Item Code">
+            <datalist id="item-code-suggestions"></datalist>
+        </td>
+        <td>
+            <input type="text" class="item-name-input" list="item-name-suggestions" placeholder="Item Name">
+            <datalist id="item-name-suggestions"></datalist>
+        </td>
+        <td><input type="number" class="qty-input" oninput="validateQty(this)" placeholder="Qty"></td>
+        <td><input type="text" class="unit-input" placeholder="Unit" readonly></td>
+        <td><input type="number" class="rate-input" oninput="calculateAmount(this)" placeholder="Rate"></td>
+        <td><span class="amount-text">0</span></td>
+        <td><span class="mrp">0</span></td>
+        <td><span class="delete-btn" onclick="deleteRow(this)"><img src="./icons/cross.png" width="15px" alt=""></span></td>
+    `;
+                itemTable.appendChild(row);
+
+                // Attach event listeners for item code and item name
+                const itemCodeInput = row.querySelector(".item-code-input");
+                const itemNameInput = row.querySelector(".item-name-input");
+
+                attachEventListenerToInput(itemCodeInput, "itemCode", row);
+                attachEventListenerToInput(itemNameInput, "itemName", row);
+            };
+
+            // Attach event listeners to inputs
+            const attachEventListenerToInput = (inputElement, field, row) => {
+                const dataListId = field === "itemCode" ? "item-code-suggestions" : "item-name-suggestions";
+                const dataList = document.getElementById(dataListId);
+
+                inputElement.addEventListener("input", async () => {
+                    const input = inputElement.value.trim();
+                    dataList.innerHTML = ""; // Clear previous suggestions
+
+                    if (input) {
+                        const suggestions = await window.fetchSuggestions(input, field);
+
+                        suggestions.forEach((item) => {
+                            const option = document.createElement("option");
+                            option.value = field === "itemCode" ? item.id : item.itemName;
+                            dataList.appendChild(option);
+                        });
+                    }
+                });
+
+                inputElement.addEventListener("change", async () => {
+                    const input = inputElement.value.trim();
+                    const suggestions = await window.fetchSuggestions(input, field);
+
+                    if (suggestions.length > 0) {
+                        const item = suggestions[0]; // Use the first matching item
+                        row.querySelector(".item-code-input").value = item.itemCode || "";
+                        row.querySelector(".item-name-input").value = item.itemName || "";
+                        row.querySelector(".unit-input").value = item.unit || "";
+                        row.querySelector(".mrp").textContent = item.mrp || 0;
+                        row.dataset.stock = item.stock || 0; // Store stock in the row dataset
+                    } else {
+                        alert("Item not found.");
+                    }
+                });
+            };
+
+            // Validate quantity input
+            const validateQty = (qtyInput) => {
+                const row = qtyInput.closest("tr");
+                const stock = parseInt(row.dataset.stock, 10) || 0;
+                const qty = parseInt(qtyInput.value, 10) || 0;
+
+                if (qty > stock) {
+                    alert(`Quantity cannot exceed available stock (${stock}).`);
+                    qtyInput.value = stock; // Reset to maximum available stock
+                }
+            };
+
+
+
+
+
+
+            // Add a save button handler
+
+
+
+
+
+
+
+
+            const toggleDeleteButtonsVisibility = () => {
+                const deleteButtons = document.querySelectorAll('.delete-btn');
+                const shouldShow = rowCount > 1; // Show only if more than one row
+                deleteButtons.forEach(button => {
+                    button.style.display = shouldShow ? 'inline-block' : 'none';
+                });
+            };
+
+
+
+            // Check if all inputs in the last row are filled and add a new row
+            const checkAndAddRow = () => {
+                const rows = itemTable.querySelectorAll("tr");
+                const lastRow = rows[rows.length - 1];
+                const inputs = lastRow.querySelectorAll("input:not([readonly])");
+                const allFilled = Array.from(inputs).every((input) => input.value.trim() !== "");
+
+                if (allFilled) {
+                    addRow();
+                }
+            };
+            // const deleteRow = (btn) => {
+            //     const row = btn.closest('tr');
+            //     row.remove();
+            //     updateSerialNumbers();
+            //     calculateTotalAmount(); // Recalculate the total after deletion
+            //     // enableAddButton();
+            // };
+
+
+            const deleteRow = (button) => {
+                const row = button.closest('tr');
+                itemTable.removeChild(row);
+                rowCount--;
+                toggleDeleteButtonsVisibility();
+                updateSerialNumbers();
+                calculateTotalAmount();
+            };
+
+
+
+
+
+            // Calculate amount (unit price * quantity)
+            const calculateAmount = (input) => {
+                const row = input.closest('tr');
+                const unitPrice = row.querySelector('td:nth-child(6) input').value;
+                const quantity = row.querySelector('td:nth-child(4) input').value;
+                const amountCell = row.querySelector('td:nth-child(7) .amount-text');
+                if (unitPrice && quantity) {
+                    const amount = parseFloat(unitPrice) * parseFloat(quantity);
+                    amountCell.textContent = amount.toFixed(0);
+                } else {
+                    amountCell.textContent = '0';
+                }
+
+                calculateTotalAmount(); // Recalculate the total amount whenever values are updated
+                // enableAddButton();
+                checkAndAddRow();
+            };
+
+
+
+            const initialPayment = document.getElementById("initialPayment").value;
+            const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
+            const balanceAmount = parseFloat(document.getElementById("balanceAmount").textContent || "0");
+
+            // Calculate total amount
+            // Prevent initialPayment from changing on row add/delete
+            const calculateTotalAmount = () => {
+                const amounts = document.querySelectorAll('.amount-text');
+                let sum = 0;
+                amounts.forEach(cell => {
+                    sum += parseFloat(cell.textContent) || 0;
+                });
+
+                document.getElementById('total').textContent = sum.toFixed(0);
+                document.getElementById('credtotal').textContent = sum.toFixed(0);
+
+                // Call other dependent functions, but do not modify initialPayment
+                FullPaymentCheck();
+                updateBalance(); // Update balance based on existing initialPayment
+            };
+            //FullPayment check logic updated to ensure initialPayment is user-controlled
+            function FullPaymentCheck() {
+                const transactionType = document.getElementById("transactionType").value;
+                const credtotal = parseFloat(document.getElementById("credtotal").textContent || "0");
+                const initialPaymentInput = document.getElementById('initialPayment');
+                const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
+                // console.log(credtotal);
+
+
+                if (transactionType === "Full Payment") {
+
+                    document.getElementById("balanceAmount").textContent = "0";
+                    initialPaymentInput.value = totalAmount
+                } else {
+                    initialPaymentInput.value = "0"
+                    updateBalance(); // Only update balance; do not modify initialPayment
+                }
+            }
+
+
+            document.getElementById("transactionType").addEventListener("change", () => {
+                FullPaymentCheck();
+            });
+
+
+            // Delete a row
+
+            // Update serial numbers after deleting a row
+            const updateSerialNumbers = () => {
+                rowCount = 0;
+                const rows = itemTable.querySelectorAll('tr');
+                rows.forEach(row => {
+                    rowCount++;
+                    row.querySelector('td:first-child').textContent = rowCount;
+                });
+            };
+
+            // Add event listener to the Add Item button
+            // addItemButton.addEventListener('click', addRow);
+
+
+            // Add the initial row on page load
+            window.onload = () => {
+                addRow();
+            };
+
+
+
+
+            // credit selected
+            const transactionType = document.getElementById('transactionType');
+            const creditFields = document.getElementById('creditFields');
+            const initialPaymentInput = document.getElementById('initialPayment');
+            const balanceAmountSpan = document.getElementById('balanceAmount');
+            document.getElementById('initialPayment').value = 0;
+
+
+            // Total payable amount (Example value, you can replace it dynamically)
+            let totalPayable = 1000.00; // Example total amount
+
+
+
+            // Show or hide fields based on transaction type
+
+
+
+            // Function to update the balance based on total amount and initial payment
+            // Function to update the balance based on total amount and initial payment
+            const updateBalance = () => {
+                const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
+                console.log(totalAmount);
+
+                const initialPayment = parseFloat(initialPaymentInput.value) || 0;
+                const balance = totalAmount - initialPayment;
+                balanceAmountSpan.textContent = balance.toFixed(0);
+
+            };
+
+            // Attach the `updateBalance` function to relevant events
+            initialPaymentInput.addEventListener('input', () => {
+                const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
+                const initialPayment = parseFloat(initialPaymentInput.value) || 0;
+
+                // Prevent the user from entering a value greater than the total amount
+                if (initialPayment > totalAmount) {
+                    initialPaymentInput.value = totalAmount;
+                }
+                updateBalance(); // Update the balance after validation
+            });
+
+            // Update balance whenever the total amount is recalculated
+            const originalCalculateTotalAmount = calculateTotalAmount;
+            window.calculateTotalAmount = () => {
+                originalCalculateTotalAmount(); // Call the original function to calculate total
+                updateBalance(); // Update the balance after recalculating the total
+            };
+            initialPaymentInput.addEventListener('input', () => {
+                const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
+                const initialPayment = parseFloat(initialPaymentInput.value) || 0;
+
+                // Prevent the user from entering a value greater than the total amount
+                if (initialPayment > totalAmount) {
+                    initialPaymentInput.value = totalAmount;
+                }
+                updateBalance(); // Update the balance after validation
+            });
+
+
+            navigate.addEventListener("click", () => {
+                window.history.back();
+            });
+
+            function home() {
+                window.location.href = "./homePage.html"
+            }
+            function newBill() {
+                window.open('./bill.html', '_blank');
+
+            }
+            function ledger() {
+                window.location.href = "./ledger.html"
+            }
+            function customers() {
+                window.location.href = "./customers.html"
+            }
+            function inventory() {
+                window.location.href = "./inventory.html"
+            }
+
+
+
+
+
+
+
+
+
+        </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
         <script>
             // validate
@@ -698,340 +1184,6 @@
                 pdf.save('bill.pdf');
 
             };
-
-        </script>
-        <script>
-
-
-
-            // date
-            const dateField = document.getElementById('dateField');
-
-            // Function to format a date object to 'dd-mm-yyyy'
-            const formatDate = (date) => {
-                const day = String(date.getDate()).padStart(2, '0');
-                const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are 0-indexed
-                const year = date.getFullYear();
-                return `${day}-${month}-${year}`;
-            };
-
-            // Function to parse 'dd-mm-yyyy' to a Date object
-            const parseDate = (dateStr) => {
-                const [day, month, year] = dateStr.split('-').map(Number);
-                return new Date(year, month - 1, day); // Months are 0-indexed
-            };
-
-            // Set the default value to today's date
-            const today = new Date();
-            dateField.value = formatDate(today);
-
-            // Enable editing on click
-            dateField.addEventListener('click', () => {
-                dateField.removeAttribute('readonly'); // Allow editing
-
-                // Open a date picker by temporarily adding an input of type 'date'
-                const datePicker = document.createElement('input');
-                datePicker.type = 'date';
-                datePicker.style.position = 'absolute';
-                datePicker.style.visibility = 'hidden'; // Hide the native date picker
-                document.body.appendChild(datePicker);
-
-                // Set the date picker value to the currently displayed date
-                const currentDate = parseDate(dateField.value);
-                datePicker.value = currentDate.toISOString().split('T')[0]; // Format as 'yyyy-mm-dd'
-
-                datePicker.addEventListener('change', () => {
-                    const selectedDate = new Date(datePicker.value);
-                    dateField.value = formatDate(selectedDate); // Update field in 'dd-mm-yyyy' format
-                    document.body.removeChild(datePicker); // Remove the temporary date picker
-                    // dateField.setAttribute('readonly', flase); // Make it readonly again
-                });
-
-                // Remove the date picker if the user clicks elsewhere
-                datePicker.addEventListener('blur', () => {
-                    document.body.removeChild(datePicker);
-                    // dateField.setAttribute('readonly', true); // Reapply readonly
-                });
-
-                datePicker.click(); // Trigger the date picker
-            });
-
-            // Restore readonly attribute on blur
-            dateField.addEventListener('blur', () => {
-                if (!dateField.value) {
-                    dateField.value = formatDate(today); // Reset to today's date if empty
-                }
-                dateField.setAttribute('readonly', true);
-            });
-
-
-
-
-
-
-
-
-
-
-            additem = () => {
-                addRow();
-            }
-
-
-
-            // const addItemButton = document.getElementById('addItemButton');
-            const itemTable = document.getElementById('itemTable').querySelector('tbody');
-            maxrow = 15
-            let rowCount = 0;
-
-            // Enable Add Item button only if the current row is complete
-            // const enableAddButton = () => {
-            //     const rows = itemTable.querySelectorAll('tr');
-            //     const lastRow = rows[rows.length - 1];
-            //     const inputs = lastRow.querySelectorAll('input:not([readonly])');
-            //     const allFilled = Array.from(inputs).every(input => input.value.trim() !== "");
-            //     addItemButton.disabled = !allFilled;
-            // };
-
-            // Add a new row to the table
-            const addRow = () => {
-                rowCount++;
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${rowCount}</td>
-                    <td><input type="number" class=""  placeholder=""></td>
-                    <td><input type="text" class=""  placeholder=""></td>
-                    <td><input type="number" class="" oninput="calculateAmount(this)" placeholder=""></td>
-                    <td><input type="text" class=""  placeholder=""></td>
-                    <td><input type="number" class="" oninput="calculateAmount(this)" placeholder=""></td>
-                    <td><span class="amount-text">0</span></td>
-                    <td><span class="mrp">0</span></td>
-                    <td><span class="delete-btn" onclick="deleteRow(this)"><img src="./icons/cross.png" width="15px" alt=""></span></td>
-                `;
-                itemTable.appendChild(row);
-                toggleDeleteButtonsVisibility();
-                // addItemButton.disabled = true; 
-                // Disable button until the row is filled
-            };
-            const toggleDeleteButtonsVisibility = () => {
-                const deleteButtons = document.querySelectorAll('.delete-btn');
-                const shouldShow = rowCount > 1; // Show only if more than one row
-                deleteButtons.forEach(button => {
-                    button.style.display = shouldShow ? 'inline-block' : 'none';
-                });
-            };
-
-
-
-            // Check if all inputs in the last row are filled and add a new row
-            const checkAndAddRow = () => {
-                const rows = itemTable.querySelectorAll("tr");
-                const lastRow = rows[rows.length - 1];
-                const inputs = lastRow.querySelectorAll("input:not([readonly])");
-                const allFilled = Array.from(inputs).every((input) => input.value.trim() !== "");
-
-                if (allFilled) {
-                    addRow();
-                }
-            };
-            // const deleteRow = (btn) => {
-            //     const row = btn.closest('tr');
-            //     row.remove();
-            //     updateSerialNumbers();
-            //     calculateTotalAmount(); // Recalculate the total after deletion
-            //     // enableAddButton();
-            // };
-
-
-            const deleteRow = (button) => {
-                const row = button.closest('tr');
-                itemTable.removeChild(row);
-                rowCount--;
-                toggleDeleteButtonsVisibility();
-                updateSerialNumbers();
-                calculateTotalAmount();
-            };
-
-
-
-
-
-            // Calculate amount (unit price * quantity)
-            const calculateAmount = (input) => {
-                const row = input.closest('tr');
-                const unitPrice = row.querySelector('td:nth-child(6) input').value;
-                const quantity = row.querySelector('td:nth-child(4) input').value;
-                const amountCell = row.querySelector('td:nth-child(7) .amount-text');
-                if (unitPrice && quantity) {
-                    const amount = parseFloat(unitPrice) * parseFloat(quantity);
-                    amountCell.textContent = amount.toFixed(0);
-                } else {
-                    amountCell.textContent = '0';
-                }
-
-                calculateTotalAmount(); // Recalculate the total amount whenever values are updated
-                // enableAddButton();
-                checkAndAddRow();
-            };
-
-
-
-            const initialPayment = document.getElementById("initialPayment").value;
-            const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
-            const balanceAmount = parseFloat(document.getElementById("balanceAmount").textContent || "0");
-
-            // Calculate total amount
-            // Prevent initialPayment from changing on row add/delete
-            const calculateTotalAmount = () => {
-                const amounts = document.querySelectorAll('.amount-text');
-                let sum = 0;
-                amounts.forEach(cell => {
-                    sum += parseFloat(cell.textContent) || 0;
-                });
-
-                document.getElementById('total').textContent = sum.toFixed(0);
-                document.getElementById('credtotal').textContent = sum.toFixed(0);
-
-                // Call other dependent functions, but do not modify initialPayment
-                FullPaymentCheck();
-                updateBalance(); // Update balance based on existing initialPayment
-            };
-            //FullPayment check logic updated to ensure initialPayment is user-controlled
-            function FullPaymentCheck() {
-                const transactionType = document.getElementById("transactionType").value;
-                const credtotal = parseFloat(document.getElementById("credtotal").textContent || "0");
-                const initialPaymentInput = document.getElementById('initialPayment');
-                const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
-                // console.log(credtotal);
-
-
-                if (transactionType === "Full Payment") {
-
-                    document.getElementById("balanceAmount").textContent = "0";
-                    initialPaymentInput.value = totalAmount
-                } else {
-                    initialPaymentInput.value = "0"
-                    updateBalance(); // Only update balance; do not modify initialPayment
-                }
-            }
-
-
-            document.getElementById("transactionType").addEventListener("change", () => {
-                FullPaymentCheck();
-            });
-
-
-            // Delete a row
-
-            // Update serial numbers after deleting a row
-            const updateSerialNumbers = () => {
-                rowCount = 0;
-                const rows = itemTable.querySelectorAll('tr');
-                rows.forEach(row => {
-                    rowCount++;
-                    row.querySelector('td:first-child').textContent = rowCount;
-                });
-            };
-
-            // Add event listener to the Add Item button
-            // addItemButton.addEventListener('click', addRow);
-
-
-            // Add the initial row on page load
-            window.onload = () => {
-                addRow();
-            };
-
-
-
-
-            // credit selected
-            const transactionType = document.getElementById('transactionType');
-            const creditFields = document.getElementById('creditFields');
-            const initialPaymentInput = document.getElementById('initialPayment');
-            const balanceAmountSpan = document.getElementById('balanceAmount');
-            document.getElementById('initialPayment').value = 0;
-
-
-            // Total payable amount (Example value, you can replace it dynamically)
-            let totalPayable = 1000.00; // Example total amount
-
-
-
-            // Show or hide fields based on transaction type
-
-
-
-            // Function to update the balance based on total amount and initial payment
-            // Function to update the balance based on total amount and initial payment
-            const updateBalance = () => {
-                const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
-                console.log(totalAmount);
-
-                const initialPayment = parseFloat(initialPaymentInput.value) || 0;
-                const balance = totalAmount - initialPayment;
-                balanceAmountSpan.textContent = balance.toFixed(0);
-
-            };
-
-            // Attach the `updateBalance` function to relevant events
-            initialPaymentInput.addEventListener('input', () => {
-                const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
-                const initialPayment = parseFloat(initialPaymentInput.value) || 0;
-
-                // Prevent the user from entering a value greater than the total amount
-                if (initialPayment > totalAmount) {
-                    initialPaymentInput.value = totalAmount;
-                }
-                updateBalance(); // Update the balance after validation
-            });
-
-            // Update balance whenever the total amount is recalculated
-            const originalCalculateTotalAmount = calculateTotalAmount;
-            window.calculateTotalAmount = () => {
-                originalCalculateTotalAmount(); // Call the original function to calculate total
-                updateBalance(); // Update the balance after recalculating the total
-            };
-            initialPaymentInput.addEventListener('input', () => {
-                const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
-                const initialPayment = parseFloat(initialPaymentInput.value) || 0;
-
-                // Prevent the user from entering a value greater than the total amount
-                if (initialPayment > totalAmount) {
-                    initialPaymentInput.value = totalAmount;
-                }
-                updateBalance(); // Update the balance after validation
-            });
-
-
-            navigate.addEventListener("click", () => {
-                window.history.back();
-            });
-
-            function home() {
-                window.location.href = "./homePage.html"
-            }
-            function newBill() {
-                window.open('./bill.html', '_blank');
-
-            }
-            function ledger(){
-                window.location.href="./ledger.html"
-            }
-            function customers(){
-                window.location.href="./customers.html"
-            }
-            function inventory(){
-                window.location.href="./inventory.html"
-            }
-
-
-
-
-
-
-
-
 
         </script>
 

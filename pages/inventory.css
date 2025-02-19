@@ -98,6 +98,7 @@ body {
     display: none;
 }
 
+
 .custBody {
     margin: 10px 100px;
 }
@@ -284,11 +285,63 @@ table tbody td input{
     box-sizing: border-box;
     border: none; /* Ensure consistent sizing */
 }
+.stock{
+    background-color: yellow;
+}
+
 
 /* Optional: Reduce button size for delete button */
-.btn-danger {
+.btn-danger1 {
+    background-color: #c50404;
+    color: rgb(255, 255, 255);
     padding: 2px 6px;
     font-size: 12px;
     height: 20px;
     line-height: 16px;
 }
+.btn-danger1:hover {
+    background-color:white;
+    color:  #c50404;
+   border: 1px solid  #c50404;
+}
+#customAlertContainer {
+    position: fixed;
+    top: 30px; /* Margin from the top */
+    left: 50%;
+    transform: translateX(-50%); /* Center horizontally */
+    z-index: 1050;
+    max-width: 300px;
+    width: 100%;
+  }
+
+  .custom-alert {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-size: 1rem;
+    color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    opacity: 1;
+    transition: opacity 0.5s ease-out; /* Smooth fade-out effect */
+  }
+  
+  .custom-alert.success {
+    background-color: #28a745; /* Green for success */
+  }
+  
+  .custom-alert.error {
+    background-color: #dc3545; /* Red for error */
+  }
+  
+  .custom-alert .close-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 1.2rem;
+    cursor: pointer;
+  }
+  
+ 
