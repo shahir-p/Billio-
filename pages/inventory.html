@@ -255,7 +255,7 @@
         <option value="Box" ${data.unit === 'Box' ? 'selected' : ''}>Box</option>
       </select>
     </td>
-    <td><input type="number" class="form-control" step="0.01" value="${data.mrp || ''}" /></td>
+    <td><input type="number" class="form-control" step="0.01" value="${data.mrp || '0'}" /></td>
     <td><input type="date" class="form-control" value="${data.expiry ? new Date(data.expiry).toISOString().split('T')[0] : ''}" /></td>
     <td>
       <button class="btn btn-danger1 btn-sm delete-row" style="display: none;">Delete</button>

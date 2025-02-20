@@ -96,8 +96,8 @@
                         <div>
                             <label for="transactionType" class="form-label">Transaction Type:</label>
                             <select id="transactionType" class="form-control  inputTrans" required>
-                                <option value="credit">Credit</option>
                                 <option value="Full Payment">Full Payment</option>
+                                <option value="credit">Credit</option>
 
 
                             </select>
@@ -148,7 +148,7 @@
 
                     <div class="bottomRow">
                         <div class="rowGrid">
-                            <span>Current Balance :</span>
+                            <span>Current Balance : <span id="currentBalance"></span></span>
                             <span style="color: red;">Running Balance : <span id="balanceAmount"></span></span>
                         </div>
                         <div class="rowGrid">
@@ -157,8 +157,8 @@
                                     class=" input"></span>
                         </div>
                         <div class="buttonGroup">
-                            <div class="buttons" style="background-color: rgb(211, 173, 0);">Print</div>
-                            <div class="buttons" style="background-color: rgb(5, 165, 173);">Save</div>
+                            <div class="buttons" id="print" style="background-color: rgb(211, 173, 0);">Print</div>
+                            <div class="buttons" id="savefb" style="background-color: rgb(5, 165, 173);">Save</div>
                             <div class="buttons" id="creditsave">Save & Print</div>
                         </div>
                     </div>
@@ -243,77 +243,6 @@
             const db = getFirestore(app);
 
 
-
-            window.fetchSuggestions = async (input, field) => {
-                if (!input || !field) return [];
-
-                try {
-                    const inventoryRef = collection(db, "inventory");
-                    const q = query(inventoryRef, where(field, ">=", input), where(field, "<=", input + "\uf8ff")); // Prefix match query
-                    const querySnapshot = await getDocs(q);
-
-                    const suggestions = [];
-                    querySnapshot.forEach((doc) => {
-                        suggestions.push({ id: doc.id, ...doc.data() });
-                    });
-
-                    return suggestions;
-                } catch (error) {
-                    console.error("Error fetching suggestions:", error);
-                    return [];
-                }
-            };
-
-
-
-
-            window.updateStock = async (itemCode, quantity) => {
-                try {
-                    const itemDocRef = doc(db, "inventory", itemCode);
-                    const itemDocSnap = await getDoc(itemDocRef);
-
-                    if (itemDocSnap.exists()) {
-                        const currentStock = itemDocSnap.data().stock || 0;
-
-                        if (currentStock < quantity) {
-                            alert("Insufficient stock available!");
-                            return;
-                        }
-
-                        const newStock = currentStock - quantity;
-
-                        await updateDoc(itemDocRef, { stock: newStock });
-                        console.log(`Stock updated for ${itemCode}: ${newStock}`);
-                    } else {
-                        alert(`Item with code ${itemCode} not found in the database.`);
-                    }
-                } catch (error) {
-                    console.error("Error updating stock:", error);
-                }
-            };
-
-            const saveData = async () => {
-                const rows = document.querySelectorAll("#itemTable tbody tr");
-
-                for (const row of rows) {
-                    const itemCode = row.querySelector(".item-code-input").value.trim();
-                    const quantity = parseInt(row.querySelector(".qty-input").value.trim(), 10);
-
-                    if (itemCode && quantity > 0) {
-                        // Call the Firestore stock update function
-                        await window.updateStock(itemCode, quantity);
-                    }
-                }
-
-                alert("Data saved and stock updated successfully!");
-            };
-
-            
-      
-
-
-
-
             let customers = [];
 
             async function fetchCustomers() {
@@ -359,10 +288,79 @@
 
             fetchCustomers();
 
-            window.validateAndSaveTransaction = async function validateAndSaveTransaction() {
+
+            window.fetchSuggestions = async (input, field) => {
+                if (!input || !field) return [];
+
                 try {
-                    const saveButton = document.getElementById("creditsave"); // Replace with the actual ID of your save button
-                    saveButton.disabled = true; // Disable the button immediately after clicking
+                    const inventoryRef = collection(db, "inventory");
+                    const q = query(inventoryRef, where(field, ">=", input), where(field, "<=", input + "\uf8ff")); // Prefix match query
+                    const querySnapshot = await getDocs(q);
+
+                    const suggestions = [];
+                    querySnapshot.forEach((doc) => {
+                        suggestions.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    return suggestions;
+                } catch (error) {
+                    console.error("Error fetching suggestions:", error);
+                    return [];
+                }
+            };
+
+
+
+
+            window.updateStock = async (itemCode, quantity) => {
+                try {
+                    const itemDocRef = doc(db, "inventory", itemCode);
+                    const itemDocSnap = await getDoc(itemDocRef);
+
+                    if (itemDocSnap.exists()) {
+                        const currentStock = itemDocSnap.data().stock || 0;
+
+                        if (currentStock < quantity) {
+                            alert("Insufficient stock available!");
+                            return false;
+                        }
+
+                        const newStock = currentStock - quantity;
+
+                        await updateDoc(itemDocRef, { stock: newStock });
+                        console.log(`Stock updated for ${itemCode}: ${newStock}`);
+                        return true;
+                    } else {
+                        alert(`Item with code ${itemCode} not found in the database.`);
+                        return false;
+                    }
+                } catch (error) {
+                    console.error("Error updating stock:", error);
+                    return false;
+                }
+            };
+
+            const saveData = async () => {
+                const rows = document.querySelectorAll("#itemTable tbody tr");
+
+                for (const row of rows) {
+                    const itemCode = row.querySelector(".item-code-input").value.trim();
+                    const quantity = parseInt(row.querySelector(".qty-input").value.trim(), 10);
+
+                    if (itemCode && quantity > 0) {
+                        const stockUpdated = await window.updateStock(itemCode, quantity);
+                        if (!stockUpdated) {
+                            return false; // Stop if any stock update fails
+                        }
+                    }
+                }
+
+                alert("Data saved and stock updated successfully!");
+                return true;
+            };
+
+            async function validateAndSaveTransaction(action) {
+                try {
                     const customerName = document.getElementById("customerNameName").value.trim();
                     const phoneNumber = document.getElementById("phoneNumber").value.trim();
                     const date = document.getElementById("dateField").value.trim();
@@ -372,39 +370,30 @@
                     const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
                     const balanceAmount = parseFloat(document.getElementById("balanceAmount").textContent || "0");
 
-                    // Check if all required fields are filled
+                    // Validations
                     if (!customerName || !phoneNumber || !date || !transactionType || !transactionMode) {
                         showAlert("All fields are required.", 2500);
-
                         return;
                     }
 
-                    // Validate phone number (must be exactly 10 digits)
                     if (!/^\d{10}$/.test(phoneNumber)) {
                         showAlert("Phone number must be exactly 10 digits.", 2500);
-
                         return;
                     }
 
-                    // Check if initial payment equals total amount and transaction type is "credit"
                     if (initialPayment === totalAmount && transactionType === "credit") {
                         showAlert("Transaction type cannot be 'Credit' when the full amount is paid.", 2500);
-
                         return;
                     }
 
-                    // Validate the items table
                     const table = document.getElementById("itemTable").querySelector("tbody");
                     if (!table || table.rows.length === 0) {
                         showAlert("Add at least one item.", 2500);
-
                         return;
                     }
 
-                    console.log("All validations passed. Proceeding to save or update transaction...");
-
-                    // Proceed with saving or updating the transaction
-                    await saveOrUpdateTransaction(
+                    // Save or update transaction
+                    const result = await saveOrUpdateTransaction(
                         customerName,
                         phoneNumber,
                         date,
@@ -414,10 +403,26 @@
                         totalAmount,
                         balanceAmount
                     );
+
+                    if (result) {
+                        const stockUpdated = await saveData();
+
+                        if (stockUpdated) {
+                            if (action === "savePrint") {
+                                window.pdfload(); // Generate and print the PDF
+                                showAlert("Transaction saved and printed successfully!", 3000);
+                            } else if (action === "save") {
+                                showAlert("Transaction saved successfully!", 3000);
+                            }
+                        } else {
+                            showAlert("Error updating stock. Transaction not fully saved.", 3000);
+                        }
+                    }
                 } catch (error) {
                     console.error("Error during validation and save:", error);
+                    showAlert("An error occurred. Please try again.", 3000);
                 }
-            };
+            }
 
             async function saveOrUpdateTransaction(customerName, phoneNumber, date, transactionType, transactionMode, initialPayment, totalAmount, balanceAmount) {
                 try {
@@ -446,7 +451,6 @@
                     });
 
                     if (!querySnapshot.empty) {
-                        // Update existing customer record
                         const docRef = querySnapshot.docs[0].ref;
                         const existingData = querySnapshot.docs[0].data();
 
@@ -461,8 +465,6 @@
                                 transactionMode,
                                 totalAmount,
                                 balanceAmount,
-                                customerName,
-                                phoneNumber,
                             },
                         ];
 
@@ -473,14 +475,8 @@
                                 timestamp: new Date().toLocaleString(),
                                 transactionMode,
                                 invoiceNo: newInvoiceNo,
-                                totalAmount,
-                                balanceAmount,
-                                customerName,
-                                phoneNumber,
                             },
                         ];
-
-                        const totalPaid = updatedTransactionHistory.reduce((sum, transaction) => sum + parseFloat(transaction.paidAmount || 0), 0);
 
                         const updatedData = {
                             ...existingData,
@@ -488,27 +484,18 @@
                             totalAmount: (existingData.totalAmount || 0) + totalAmount,
                             balanceAmount: (existingData.balanceAmount || 0) + balanceAmount,
                             transactionHistory: updatedTransactionHistory,
-                            totalPaid, // Add the totalPaid key
                         };
 
                         await updateDoc(docRef, updatedData);
-                        showAlert("Transaction updated successfully!", 3000);
                     } else {
-                        // Add a new customer record
                         const transactionHistory = [
                             {
                                 paidAmount: initialPayment,
                                 timestamp: new Date().toLocaleString(),
                                 transactionMode,
                                 invoiceNo: newInvoiceNo,
-                                totalAmount,
-                                balanceAmount,
-                                customerName,
-                                phoneNumber,
                             },
                         ];
-
-                        const totalPaid = transactionHistory.reduce((sum, transaction) => sum + parseFloat(transaction.paidAmount || 0), 0);
 
                         const data = {
                             customerName,
@@ -523,47 +510,42 @@
                                     transactionMode,
                                     totalAmount,
                                     balanceAmount,
-                                    customerName,
-                                    phoneNumber,
                                 },
                             ],
                             totalAmount,
                             balanceAmount,
                             transactionHistory,
-                            totalPaid, // Add the totalPaid key
                         };
 
                         await addDoc(billsRef, data);
-
-
-                        // showAlert("Transaction saved successfully!", 3000);
                     }
-                    saveData();
-                    
-                    // window.pdfload();
-                    // location.reload();
+
+                    return true; // Success
                 } catch (error) {
                     console.error("Error saving/updating transaction:", error);
-                    showAlert("Error! Please contact support.", 5000);
+                    showAlert("Error saving the transaction. Please try again.", 3000);
+                    return false; // Failure
                 }
             }
 
-            // Show custom alert messages
-            const showAlert = (message, duration = 3000) => {
+            function showAlert(message, duration = 3000) {
                 const alertBox = document.getElementById("customAlert");
                 alertBox.textContent = message;
                 alertBox.style.display = "block";
                 setTimeout(() => {
                     alertBox.style.display = "none";
                 }, duration);
-            };
+            }
 
-
-            // Add event listener for the save button
-            document.getElementById("creditsave").addEventListener("click", () => {
-                validateAndSaveTransaction();
-
+            // Button event listeners
+            document.getElementById("savefb").addEventListener("click", () => validateAndSaveTransaction("save"));
+            document.getElementById("print").addEventListener("click", () => {
+                window.pdfload();
+                showAlert("Invoice printed successfully!", 3000);
             });
+            document.getElementById("creditsave").addEventListener("click", () => validateAndSaveTransaction("savePrint"));
+
+
 
         </script>
 
@@ -896,7 +878,7 @@
 
 
             // Total payable amount (Example value, you can replace it dynamically)
-            let totalPayable = 1000.00; // Example total amount
+
 
 
 
@@ -951,20 +933,24 @@
             });
 
             function home() {
-                window.location.href = "./homePage.html"
+                
+                window.open('./homePage.html', '_blank');
             }
             function newBill() {
                 window.open('./bill.html', '_blank');
 
             }
             function ledger() {
-                window.location.href = "./ledger.html"
+              
+                window.open('./ledger.html', '_blank');
             }
             function customers() {
-                window.location.href = "./customers.html"
+                
+                window.open('./customers.html', '_blank');
             }
             function inventory() {
-                window.location.href = "./inventory.html"
+              
+                window.open('./inventory.html', '_blank');
             }
 
 
@@ -1179,9 +1165,8 @@
 
                 // Display Paid Amount
                 // pdf.text(paidText, xPosition, y);  // Position it below Total
+                pdf.output('dataurlnewwindow');
 
-                // Save PDF
-                pdf.save('bill.pdf');
 
             };
 
