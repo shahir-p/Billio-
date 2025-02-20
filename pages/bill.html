@@ -329,7 +329,7 @@
                         const currentStock = itemDocSnap.data().stock || 0;
 
                         if (currentStock < quantity) {
-                            alert("Insufficient stock available!");
+                            showAlert("Insufficient stock available!", 2500);
                             return false;
                         }
 
@@ -339,7 +339,7 @@
                         console.log(`Stock updated for ${itemCode}: ${newStock}`);
                         return true;
                     } else {
-                        alert(`Item with code ${itemCode} not found in the database.`);
+                        showAlert(`Item with code ${itemCode} not found in the database.`, 2500);
                         return false;
                     }
                 } catch (error) {
@@ -367,7 +367,7 @@
                     }
                 }
 
-                alert("Data saved and stock updated successfully!");
+
                 return true;
             };
 
@@ -1070,7 +1070,7 @@
                         no: cells[0].textContent,
                         code: cells[1].querySelector("input").value,
                         description: cells[2].querySelector("input").value,
-                        quantity: cells[3].querySelector("input").value + cells[4].querySelector("input").value || "",
+                        quantity: cells[3].querySelector("input").value + " " + cells[4].querySelector("input").value || "",
                         price: cells[5].querySelector("input").value,
                         subtotal: cells[6].textContent,
                     };
@@ -1078,33 +1078,38 @@
 
                 const pdf = new jsPDF();
 
+                // Draw border for the whole PDF
+                const pageWidth = pdf.internal.pageSize.width;
+                const pageHeight = pdf.internal.pageSize.height;
+                pdf.setLineWidth(0.1); // Set border thickness
+                pdf.setDrawColor(0, 0, 0); // Set border color (black)
+                pdf.rect(5, 5, pageWidth - 10, pageHeight - 10); // Draw rectangle for border
+
                 // Header section
                 pdf.setFontSize(10);
-                pdf.text("Issued From:", 15, 20);
-                pdf.text("Your Company Name", 15, 25);
-                pdf.text("Your Address Line 1", 15, 30);
-                pdf.text("City, State, ZIP", 15, 35);
+                pdf.text("Issued From:", 15, 30);
+                pdf.text("Your Company Name", 15, 35);
+                pdf.text("Your Address Line 1", 15, 40);
+                pdf.text("City, State, ZIP", 15, 45);
 
                 // "Issued To" Section
-                const pageWidth = pdf.internal.pageSize.width;
-                pdf.text("Issued To:", pageWidth - 55, 20);
-                pdf.text(customerName, pageWidth - 55, 25);
-                pdf.text(phoneNumber, pageWidth - 55, 30);
+                pdf.text("Issued To:", pageWidth - 55, 30);
+                pdf.text(customerName, pageWidth - 55, 35);
+                pdf.text(phoneNumber, pageWidth - 55, 40);
 
                 // "INVOICE" Title
                 pdf.setFontSize(12);
-                pdf.text("INVOICE", 105, 10, { align: "center" });
+                pdf.text("INVOICE", 105, 15, { align: "center" });
 
                 // Date and Invoice Number
                 pdf.setFontSize(10);
-                pdf.text(`Date Issued: ${date}`, pageWidth - 55, 45);
-                pdf.text(`Invoice No: ${invoiceNumber}`, 15, 45);
-
+                pdf.text(`Date Issued: ${date}`, pageWidth - 55, 55);
+                pdf.text(`Invoice No: ${invoiceNumber}`, 15, 55);
 
                 // Table Header
-                const headers = ["No", "Item Code", "Item ", "Qty", "Price", "Subtotal"];
+                const headers = ["No", "Item Code", "Item", "Qty", "Price", "Subtotal"];
                 const startY = 60;
-                pdf.setFontSize(10);
+
                 pdf.autoTable({
                     head: [headers],
                     body: items.map((item) => [
@@ -1118,12 +1123,19 @@
                     startY,
                     theme: "grid",
                     styles: { fontSize: 10, cellPadding: 3 },
+                    columnStyles: {
+                        0: { cellWidth: 15 },  // Column 0 (No) - narrower width
+                        1: { cellWidth: 30 },  // Column 1 (Item Code) - wider width
+                        2: { cellWidth: 55 },  // Column 2 (Item Description)
+                        3: { cellWidth: 20 },  // Column 3 (Qty)
+                        4: { cellWidth: 30 },  // Column 4 (Price)
+                        5: { cellWidth: 30 },  // Column 5 (Subtotal)
+                    },
                 });
+
 
                 // Summary Section
                 const summaryStartY = pdf.lastAutoTable.finalY + 10;
-
-                // Align text to the right
                 pdf.text(`Grand Total:  ${totalAmount.toFixed(2)}`, pageWidth - 15, summaryStartY, { align: 'right' });
                 pdf.text(`Paid Amount:  ${paidAmount.toFixed(2)}`, pageWidth - 15, summaryStartY + 5, { align: 'right' });
                 pdf.text(`Balance Amount:  ${balanceAmount.toFixed(2)}`, pageWidth - 15, summaryStartY + 10, { align: 'right' });
@@ -1131,20 +1143,25 @@
                 pdf.text(`Old Balance: ${crrbalance}`, 15, summaryStartY);
                 pdf.text(`Remaining Balance: ${updbalance}`, 15, summaryStartY + 5);
 
-
-
                 // Footer Section
                 const footerY = summaryStartY + 30;
-                pdf.setFontSize(10);
-
-
                 pdf.text("(Signature)", 170, footerY + 10);
                 pdf.setFontSize(12);
                 pdf.text("THANK YOU", 105, footerY + 30, { align: "center" });
 
                 // Save PDF
-                pdf.save(`invoice_${invoiceNumber}.pdf`);
+                pdf.output('dataurlprint');
+                const pdfDataUrl = pdf.output('dataurlstring');
+                const filename = `${customerName}_${invoiceNumber}.pdf`.replace(/\s+/g, '_');
+                const link = document.createElement('a');
+                link.href = pdfDataUrl;
+                link.download = filename;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
             }
+
 
 
         </script>
