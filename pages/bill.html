@@ -255,11 +255,13 @@
                         balanceAmount: doc.data().balanceAmount,
 
                     }));
+
                     console.log("Fetched customers:", customers);
                 } catch (error) {
                     console.error("Error fetching customers:", error);
                 }
             }
+
 
             document.getElementById("customerNameName").addEventListener("input", function () {
                 const input = this.value.trim().toLowerCase();
@@ -271,8 +273,9 @@
                     // Auto-fill the phone number if a match is found
                     document.getElementById("phoneNumber").value = customer.phoneNumber;
                     document.getElementById("currentBalance").textContent = customer.balanceAmount;
+                    window.crrbalanceAmount = customer.balanceAmount;
                     document.getElementById("phoneNumber").setAttribute("readonly", true);
-                    window.crrbalanceAmount = balanceAmount;
+
                 } else {
                     // Clear phone number field if no match
                     document.getElementById("phoneNumber").value = "";
@@ -346,6 +349,10 @@
             };
 
             const saveData = async () => {
+
+                if (!validateTable()) {
+                    return; // Stop further execution if validation fails
+                }
                 const rows = document.querySelectorAll("#itemTable tbody tr");
 
                 for (const row of rows) {
@@ -363,6 +370,49 @@
                 alert("Data saved and stock updated successfully!");
                 return true;
             };
+
+            const validateTable = () => {
+                const table = document.getElementById("itemTable").querySelector("tbody");
+                if (!table || table.rows.length === 0) {
+                    showAlert("Add at least one item.", 2500);
+                    return false;
+                }
+
+                for (const [index, row] of Array.from(table.rows).entries()) {
+                    const itemCodeInput = row.querySelector(".item-code-input");
+                    const itemNameInput = row.querySelector(".item-name-input");
+                    const qtyInput = row.querySelector(".qty-input");
+                    const rateInput = row.querySelector(".rate-input");
+
+                    const itemCode = itemCodeInput ? itemCodeInput.value.trim() : null;
+                    const itemName = itemNameInput ? itemNameInput.value.trim() : null;
+                    const qty = qtyInput ? qtyInput.value.trim() : null;
+                    const rate = rateInput ? rateInput.value.trim() : null;
+
+                    if (!itemCode) {
+                        showAlert(`Item code is missing in row ${index + 1}.`, 2500);
+                        return false;
+                    }
+
+                    if (!itemName) {
+                        showAlert(`Item name is missing in row ${index + 1}.`, 2500);
+                        return false;
+                    }
+
+                    if (!qty || isNaN(qty) || parseInt(qty, 10) <= 0) {
+                        showAlert(`Invalid quantity in row ${index + 1}.`, 2500);
+                        return false;
+                    }
+
+                    if (!rate || isNaN(rate) || parseFloat(rate) <= 0) {
+                        showAlert(`Invalid rate in row ${index + 1}.`, 2500);
+                        return false;
+                    }
+                }
+
+                return true; // If all validations pass
+            };
+
 
             async function validateAndSaveTransaction(action) {
                 try {
@@ -390,12 +440,10 @@
                         showAlert("Transaction type cannot be 'Credit' when the full amount is paid.", 2500);
                         return;
                     }
+                    validateTable();
 
-                    const table = document.getElementById("itemTable").querySelector("tbody");
-                    if (!table || table.rows.length === 0) {
-                        showAlert("Add at least one item.", 2500);
-                        return;
-                    }
+
+
 
                     // Save or update transaction
                     const result = await saveOrUpdateTransaction(
@@ -476,7 +524,9 @@
                                 transactionMode,
                                 totalAmount,
                                 balanceAmount,
+
                             },
+
                         ];
 
                         const updatedTransactionHistory = [
@@ -498,6 +548,7 @@
                         };
 
                         await updateDoc(docRef, updatedData);
+
                     } else {
                         const transactionHistory = [
                             {
@@ -531,7 +582,9 @@
                         await addDoc(billsRef, data);
 
 
+
                     }
+
 
                     return true; // Success
                 } catch (error) {
@@ -1003,10 +1056,12 @@
                 const phoneNumber = document.getElementById("phoneNumber").value.trim();
                 const date = document.getElementById("dateField").value.trim();
                 const invoiceNumber = window.InvoiceNo || "N/A";
-                const crrbalanceAmount = window.crrbalanceAmount || "N/A";
+                const crrbalance = window.crrbalanceAmount || "N/A";
+
                 const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
                 const paidAmount = parseFloat(document.getElementById("initialPayment").value || "0");
                 const balanceAmount = totalAmount - paidAmount;
+                const updbalance = crrbalance + balanceAmount;
 
                 const table = document.getElementById("itemTable").querySelector("tbody");
                 const items = Array.from(table.rows).map((row) => {
@@ -1073,17 +1128,17 @@
                 pdf.text(`Paid Amount:  ${paidAmount.toFixed(2)}`, pageWidth - 15, summaryStartY + 5, { align: 'right' });
                 pdf.text(`Balance Amount:  ${balanceAmount.toFixed(2)}`, pageWidth - 15, summaryStartY + 10, { align: 'right' });
 
-                pdf.text(`Current Balance: ${crrbalanceAmount}`, 15, summaryStartY);
+                pdf.text(`Old Balance: ${crrbalance}`, 15, summaryStartY);
+                pdf.text(`Remaining Balance: ${updbalance}`, 15, summaryStartY + 5);
+
 
 
                 // Footer Section
                 const footerY = summaryStartY + 30;
                 pdf.setFontSize(10);
-                pdf.text("Note:", 10, footerY);
-                pdf.text("Bank Name: Your Bank", 10, footerY + 5);
-                pdf.text("Account No: 0123 4567 8901", 10, footerY + 10);
 
-                pdf.text("(Signature)", 160, footerY + 10);
+
+                pdf.text("(Signature)", 170, footerY + 10);
                 pdf.setFontSize(12);
                 pdf.text("THANK YOU", 105, footerY + 30, { align: "center" });
 
