@@ -464,8 +464,10 @@
                             if (action === "savePrint") {
                                 window.pdfload(); // Generate and print the PDF
                                 showAlert("Transaction saved and printed successfully!", 3000);
+                                window.location.reload();
                             } else if (action === "save") {
                                 showAlert("Transaction saved successfully!", 3000);
+                                window.location.reload();
                             }
                         } else {
                             showAlert("Error updating stock. Transaction not fully saved.", 3000);
@@ -604,10 +606,20 @@
             }
 
             // Button event listeners
-            document.getElementById("savefb").addEventListener("click", () => validateAndSaveTransaction("save"));
-            document.getElementById("print").addEventListener("click", () => { window.pdfload(); });
-            document.getElementById("creditsave").addEventListener("click", () => validateAndSaveTransaction("savePrint"));
+            document.getElementById("savefb").addEventListener("click", () => {
+                handleButtonClick("savefb", () => validateAndSaveTransaction("save"));
+            });
 
+            document.getElementById("print").addEventListener("click", () => { window.pdfload(); });
+
+            // Common function to handle button disabling and execution
+            function handleButtonClick(buttonId, callback) {
+                const button = document.getElementById(buttonId);
+                if (button.disabled) return; // Prevent double clicks
+                button.disabled = true;     // Disable the button
+                button.style.cursor = "not-allowed"; // Optional: Change cursor to indicate disabled state
+                callback();                 // Execute the intended function
+            }
 
             // Add keyboard shortcuts
             document.addEventListener("keydown", (event) => {
