@@ -419,6 +419,7 @@
                     const customerName = document.getElementById("customerNameName").value.trim();
                     const phoneNumber = document.getElementById("phoneNumber").value.trim();
                     const date = document.getElementById("dateField").value.trim();
+                    const salesman = document.getElementById("salesMan").value.trim();
                     const transactionType = document.getElementById("transactionType").value.trim();
                     const transactionMode = document.getElementById("transactionMode").value.trim();
                     const initialPayment = parseFloat(document.getElementById("initialPayment").value || "0");
@@ -450,6 +451,7 @@
                         customerName,
                         phoneNumber,
                         date,
+                        salesman,
                         transactionType,
                         transactionMode,
                         initialPayment,
@@ -479,7 +481,7 @@
                 }
             }
 
-            async function saveOrUpdateTransaction(customerName, phoneNumber, date, transactionType, transactionMode, initialPayment, totalAmount, balanceAmount) {
+            async function saveOrUpdateTransaction(customerName, phoneNumber, date,salesman, transactionType, transactionMode, initialPayment, totalAmount, balanceAmount) {
                 try {
                     const billsRef = collection(db, "bills");
                     const customerQuery = query(billsRef, where("customerName", "==", customerName));
@@ -489,7 +491,7 @@
                     const generateUniqueInvoiceNo = async () => {
                         const allDocs = await getDocs(billsRef);
                         const allInvoices = allDocs.docs.flatMap((doc) => doc.data().invoiceNumbers || []);
-                        return `INV-${String(allInvoices.length + 1).padStart(3, "0")}`;
+                        return `INV-${allInvoices.length + 1}`;
                     };
 
                     const newInvoiceNo = await generateUniqueInvoiceNo();
@@ -521,11 +523,15 @@
                                 invoiceNo: newInvoiceNo,
                                 transactionType,
                                 date,
+                                salesman,
+                                customerName,
+                                phoneNumber,
                                 items: newItems,
                                 paidAmount: initialPayment,
                                 transactionMode,
                                 totalAmount,
                                 balanceAmount,
+                                
 
                             },
 
@@ -569,6 +575,9 @@
                                     invoiceNo: newInvoiceNo,
                                     transactionType,
                                     date,
+                                    salesman,
+                                    customerName,
+                                    phoneNumber,
                                     items: newItems,
                                     paidAmount: initialPayment,
                                     transactionMode,

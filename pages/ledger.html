@@ -310,17 +310,19 @@
             }
 
             // Add event listeners for all view buttons
-            const viewButtons = document.querySelectorAll(".view-button");
-            viewButtons.forEach((button) => {
-                button.addEventListener("click", (event) => {
-                    event.stopPropagation(); // Prevent the parent click listener
-                    const invoiceNo = button.dataset.invoice;
-                    const customerName = button.dataset.customer;
+            document.querySelectorAll('.view-button').forEach(button => {
+                button.addEventListener('click', (event) => {
+                    const invoiceNo = button.getAttribute('data-invoice');
+                    const customerName = button.getAttribute('data-customer');
 
-                    // Redirect to customer details page with query parameters
-                    window.location.href = `invoiceDetails.html?customerName=${customerName}&invoiceNo=${invoiceNo}`;
+                    // Construct the URL with query parameters
+                    const url = `invoiceDetails.html?invoiceNo=${encodeURIComponent(invoiceNo)}&customerName=${encodeURIComponent(customerName)}`;
+
+                    // Redirect to the target page
+                    window.location.href = url;
                 });
             });
+
         }
 
         function fetchAllCustomersRealTime() {
@@ -415,26 +417,26 @@
         // Fetch all customers on page load
         fetchAllCustomersRealTime();
 
-        
+
 
     </script>
     <script>
         function home() {
-                window.location.href = "./homePage.html"
-            }
-            function newBill() {
-                window.open('./bill.html', '_blank');
+            window.location.href = "./homePage.html"
+        }
+        function newBill() {
+            window.open('./bill.html', '_blank');
 
-            }
-            function ledger(){
-                window.location.href="./ledger.html"
-            }
-            function customers(){
-                window.location.href="./customers.html"
-            }
-            function inventory(){
-                window.location.href="./inventory.html"
-            }
+        }
+        function ledger() {
+            window.location.href = "./ledger.html"
+        }
+        function customers() {
+            window.location.href = "./customers.html"
+        }
+        function inventory() {
+            window.location.href = "./inventory.html"
+        }
 
     </script>
 
