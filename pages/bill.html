@@ -612,6 +612,10 @@
 
             document.getElementById("print").addEventListener("click", () => { window.pdfload(); });
 
+            document.getElementById("creditsave").addEventListener("click", () => {
+                handleButtonClick("creditsave", () => validateAndSaveTransaction("savePrint"));
+            });
+
             // Common function to handle button disabling and execution
             function handleButtonClick(buttonId, callback) {
                 const button = document.getElementById(buttonId);
