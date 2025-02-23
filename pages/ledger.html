@@ -350,15 +350,18 @@
                     });
                 });
 
-                // Sort invoices by invoiceNo in descending order
+                // Sort invoices by numeric part of invoiceNo in descending order
                 customersInvoices.sort((a, b) => {
-                    return b.invoiceNo.localeCompare(a.invoiceNo); // Sorting by invoiceNo
+                    const numA = parseInt(a.invoiceNo.match(/\d+$/) || 0); // Extract numeric part
+                    const numB = parseInt(b.invoiceNo.match(/\d+$/) || 0); // Extract numeric part
+                    return numB - numA; // Sort numerically in descending order
                 });
 
                 // Render the fetched data in HTML
                 renderCustomerList(customersInvoices);
             });
         }
+
 
         async function searchCustomersByNameOrInvoice(searchValue) {
             try {
