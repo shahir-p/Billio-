@@ -152,7 +152,7 @@
 
                     <div class="bottomRow">
                         <div class="rowGrid">
-                            <span>Old Balance : <span id="currentBalance"></span></span>
+                            <!-- <span>Old Balance : <span id="currentBalance"></span></span> -->
                             <span style="color: red;">Running Balance : <span id="balanceAmount"></span></span>
                         </div>
                         <div class="rowGrid">
@@ -262,6 +262,8 @@
             document.getElementById('invoiceNumber').value = invoiceNo;
             document.getElementById('customerNameName').value = ` ${customerName}`;
 
+            window.invoice = invoiceNo
+
             function getQueryParams() {
                 const params = new URLSearchParams(window.location.search);
                 return {
@@ -296,7 +298,7 @@
                                 const showBalance = fullBalance - tempbalance
 
 
-                                document.getElementById('currentBalance').textContent = showBalance || 0
+                                // document.getElementById('currentBalance').textContent = showBalance || 0
 
                             }
                         } else {
@@ -357,6 +359,9 @@
                                 document.getElementById("transactionType").value = iNVNO.transactionType || "";
                                 document.getElementById("transactionMode").value = iNVNO.transactionMode || "";
                                 document.getElementById("initialPayment").value = paidAmount || "0";
+                                document.getElementById("initialPayment").addEventListener("input", (e) => {
+                                    window.paidAmount = parseFloat(e.target.value) || 0; // Update `window.paidAmount` dynamically
+                                });
                                 document.getElementById("credtotal").textContent = iNVNO.totalAmount || "";
                                 document.getElementById("balanceAmount").textContent = iNVNO.balanceAmount || "0";
 
@@ -367,6 +372,9 @@
 
                                 window.invoicebalance = iNVNO.balanceAmount
                                 window.invoiceTotal = iNVNO.totalAmount
+
+
+
 
 
                                 const items = iNVNO.items || []; // Assuming `iNVNO.items` contains the array of items
@@ -633,15 +641,13 @@
                     const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
 
                     // Validations
-
-
                     if (initialPayment === totalAmount && transactionType === "credit") {
                         showAlert("Transaction type cannot be 'Credit' when the full amount is paid.", 2500);
                         return;
                     }
 
-                    const result = validateTable(); // Validate table and set result
-                    if (!result) return; // Stop execution if table validation fails
+                    const tableIsValid = validateTable();
+                    if (!tableIsValid) return;
 
                     // Collect updated table data
                     const updatedItems = [];
@@ -671,108 +677,126 @@
                         });
                     });
 
-                    let invoiceNo = window.inv
-
-
-
-
-
-
-                    // Update Firestore
                     const billsRef = collection(db, "bills");
                     const querySnapshot = await getDocs(billsRef);
 
                     let docIdToUpdate = null;
                     let invoiceNumbers = [];
+                    let transactionHistory = [];
 
                     querySnapshot.forEach((doc) => {
                         const data = doc.data();
-                        console.log("data:", data);
 
-                        // Match customer name
-                        let name = window.custName;
-                        if (data.customerName === name) {
-                            console.log("Customer found:", name);
 
-                            // Calculate new totals
-                            const previousTotalAmount = data.totalAmount || 0;
-                            const previousBalanceAmount = data.balanceAmount || 0;
 
-                            // Subtract old invoice values (if updating an existing invoice)
-                            const adjustedTotalAmount = previousTotalAmount - (window.invoiceTotal || 0);
-                            const adjustedBalanceAmount = previousBalanceAmount - (window.invoicebalance || 0);
 
-                            // Add new invoice values
-                            const updatedTotalAmount = adjustedTotalAmount + totalAmount;
-                            const updatedBalanceAmount = adjustedBalanceAmount + (totalAmount - initialPayment);
 
-                            console.log(
-                                "Adjusted total:", adjustedTotalAmount,
-                                "Adjusted balance:", adjustedBalanceAmount
-                            );
-                            console.log(
-                                "Updated total:", updatedTotalAmount,
-                                "Updated balance:", updatedBalanceAmount
-                            );
 
-                            // Update Firestore document
-                            updateDoc(doc.ref, {
-                                totalAmount: updatedTotalAmount,
-                                balanceAmount: updatedBalanceAmount,
-                            }).then(() => {
-                                console.log("Total and balance updated successfully!");
-                            }).catch((error) => {
-                                console.error("Error updating totals:", error);
-                            });
-                        } else {
-                            console.log("Customer does not match:", data.customerName);
+                        // Match customer name for total and balance updates
+                        async function calculateTotalBalanceAmount() {
+                            try {
+                                const billsCollectionRef = collection(db, "bills");
+                                const billsSnapshot = await getDocs(billsCollectionRef);
+
+                                let totalBalanceAmount = 0;
+                                let fulltotalAmount = 0;
+
+                                billsSnapshot.forEach((doc) => {
+                                    const data = doc.data();
+                                    const invoiceNumbers = data.invoiceNumbers || []; // Ensure invoiceNumbers exists
+
+                                    invoiceNumbers.forEach((invoice) => {
+                                        totalBalanceAmount += invoice.balanceAmount || 0; // Add balanceAmount, default to 0 if undefined
+                                    });
+
+                                    invoiceNumbers.forEach((total) => {
+                                        fulltotalAmount += total.totalAmount || 0; // Add totalAmount, default to 0 if undefined
+                                    });
+                                });
+
+                                return { totalBalanceAmount, fulltotalAmount }; // Return both totals as an object
+                            } catch (error) {
+                                console.error("Error calculating total balance amount:", error);
+                            }
                         }
 
-                        // Check for invoice number in the invoiceNumbers array
-                        const index = (data.invoiceNumbers || []).findIndex((inv) => inv.invoiceNo === invoiceNo);
-                        if (index !== -1) {
+                        // Use the asynchronous function to fetch and update values
+                        calculateTotalBalanceAmount().then(({ totalBalanceAmount, fulltotalAmount }) => {
+                            console.log("Total Balance Amount:", totalBalanceAmount);
+                            console.log("Full Total Amount:", fulltotalAmount);
+
+                            if (data.customerName === customerName) {
+                                updateDoc(doc.ref, {
+                                    totalAmount: fulltotalAmount,
+                                    balanceAmount: totalBalanceAmount,
+                                }).catch((error) => console.error("Error updating totals:", error));
+                            }
+                        }).catch((error) => {
+                            console.error("Error in calculateTotalBalanceAmount:", error);
+                        });
+
+                        // Find the document and invoice by `invoiceNo`
+                        const invoiceIndex = (data.invoiceNumbers || []).findIndex((inv) => inv.invoiceNo === invoiceNo);
+                        const historyIndex = (data.transactionHistory || []).findIndex((hist) => hist.invoiceNo === invoiceNo);
+
+                        if (invoiceIndex !== -1 || historyIndex !== -1) {
                             docIdToUpdate = doc.id;
-                            invoiceNumbers = data.invoiceNumbers;
+                            invoiceNumbers = data.invoiceNumbers || [];
+                            transactionHistory = data.transactionHistory || [];
                         }
                     });
 
-                    // Update invoice details if found
-                    if (docIdToUpdate) {
-                        const updatedInvoice = invoiceNumbers.map((inv) => {
-                            if (inv.invoiceNo === invoiceNo) {
-                                return {
-                                    ...inv,
-                                    phoneNumber,
-                                    salesman,
-                                    date,
-                                    transactionType,
-                                    transactionMode,
-                                    paidAmount: initialPayment,
-                                    totalAmount,
-                                    balanceAmount: totalAmount - initialPayment,
-                                    items: updatedItems,
-                                };
-                            }
-                            return inv;
-                        });
-
-                        await updateDoc(doc(db, "bills", docIdToUpdate), {
-                            invoiceNumbers: updatedInvoice,
-
-                        });
-
-                        //add stock managememt call
-                        const rows = document.querySelectorAll("#itemTable tr"); // Adjust selector as per your table ID
-                        for (const row of rows) {
-                            await handleQuantityChange(row);
-                        }
-
-                        showAlert("Invoice updated successfully!", 3000);
-                    } else {
+                    if (!docIdToUpdate) {
                         showAlert("Invoice not found for update.", 3000);
+                        return;
                     }
 
-                    // Action-specific behavior
+                    // Update invoiceNumbers
+                    const updatedInvoiceNumbers = invoiceNumbers.map((inv) => {
+                        if (inv.invoiceNo === invoiceNo) {
+                            return {
+                                ...inv,
+                                phoneNumber,
+                                salesman,
+                                date,
+                                transactionType,
+                                transactionMode,
+                                paidAmount: initialPayment,
+                                totalAmount,
+                                balanceAmount: totalAmount - initialPayment,
+                                items: updatedItems,
+                            };
+                        }
+                        return inv;
+                    });
+
+                    // Update transactionHistory
+                    const updatedTransactionHistory = transactionHistory.map((hist) => {
+                        if (hist.invoiceNo === invoiceNo) {
+                            return {
+                                ...hist,
+                                paidAmount: initialPayment,
+                                timestamp: new Date().toLocaleString(),
+                                transactionMode,
+                            };
+                        }
+                        return hist;
+                    });
+
+                    // Save updated data to Firestore
+                    await updateDoc(doc(db, "bills", docIdToUpdate), {
+                        invoiceNumbers: updatedInvoiceNumbers,
+                        transactionHistory: updatedTransactionHistory,
+                    });
+
+                    // Update inventory stock
+                    for (const row of rows) {
+                        await handleQuantityChange(row);
+                    }
+
+                    showAlert("Invoice and transaction history updated successfully!", 3000);
+
+                    // Handle "Save & Print"
                     if (action === "savePrint") {
                         window.pdfload();
                         showAlert("Transaction saved and printed successfully!", 3000);
@@ -782,8 +806,6 @@
                     showAlert("An error occurred. Please try again.", 3000);
                 }
             }
-
-
 
 
             function showAlert(message, duration = 3000) {
@@ -796,14 +818,38 @@
             }
 
             // Button event listeners
-            document.getElementById("savefb").addEventListener("click", () => {
-                validateAndSaveTransaction("save");
+            document.getElementById("savefb").addEventListener("click", async () => {
+                try {
+                    const invoiceNo = document.getElementById("invoiceNumber").value.trim(); // Ensure invoice number is provided
+                    if (!invoiceNo) {
+                        showAlert("Invoice number is required!", 3000);
+                        return;
+                    }
+                    await validateAndSaveTransaction("save", invoiceNo);
+                } catch (error) {
+                    console.error("Error during save action:", error);
+                }
             });
 
-            document.getElementById("print").addEventListener("click", () => { window.pdfload(); });
+            document.getElementById("print").addEventListener("click", () => {
+                try {
+                    window.pdfload();
+                } catch (error) {
+                    console.error("Error during print action:", error);
+                }
+            });
 
-            document.getElementById("creditsave").addEventListener("click", () => {
-                handleButtonClick("creditsave", () => validateAndSaveTransaction("savePrint"));
+            document.getElementById("creditsave").addEventListener("click", async () => {
+                try {
+                    const invoiceNo = document.getElementById("invoiceNoInput").value.trim(); // Ensure invoice number is provided
+                    if (!invoiceNo) {
+                        showAlert("Invoice number is required!", 3000);
+                        return;
+                    }
+                    await handleButtonClick("creditsave", () => validateAndSaveTransaction("savePrint", invoiceNo));
+                } catch (error) {
+                    console.error("Error during creditsave action:", error);
+                }
             });
 
             // Common function to handle button disabling and execution
@@ -1142,12 +1188,15 @@
             // Function to update the balance based on total amount and initial payment
             const updateBalance = () => {
                 const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
-                console.log(totalAmount);
+                const initialPayment = parseFloat(initialPaymentInput.value) || 0; // Ensure initialPayment is always parsed
 
-                const initialPayment = parseFloat(initialPaymentInput.value) || 0;
+                // Prevent the user from entering a value greater than the total amount
+                if (initialPayment > totalAmount) {
+                    initialPaymentInput.value = totalAmount;
+                }
+
                 const balance = totalAmount - initialPayment;
                 balanceAmountSpan.textContent = balance.toFixed(0);
-
             };
 
             // Attach the `updateBalance` function to relevant events
@@ -1155,7 +1204,7 @@
                 const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
                 const initialPayment = parseFloat(initialPaymentInput.value) || 0;
 
-                // Prevent the user from entering a value greater than the total amount
+                // Validate the input value but allow updates even if totalAmount is zero
                 if (initialPayment > totalAmount) {
                     initialPaymentInput.value = totalAmount;
                 }
