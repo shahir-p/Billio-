@@ -141,7 +141,8 @@
                                     <th style="width: 10%;">Rate</th>
                                     <th style="width: 15%;">Amount</th>
                                     <th style="width: 10%;">MRP</th>
-                                    <th style="width: 10%;"></th>
+                                    <th style="width: 10%;">Stock</th>
+                                    <th style="width: 5%;"></th>
                                 </tr>
                             <tbody>
                                 <!-- Rows will be dynamically added here -->
@@ -248,11 +249,15 @@
 
 
 
+
+
+
+
             // Retrieve query parameters
             const { invoiceNo, customerName } = getQueryParams();
 
             // Display the values on the target page
-            const numericPart = parseInt(invoiceNo.replace('INV-', ''));
+
             // Set the numeric part in the input box
             document.getElementById('invoiceNumber').value = invoiceNo;
             document.getElementById('customerNameName').value = ` ${customerName}`;
@@ -341,10 +346,10 @@
                             if (index !== -1) {
                                 const iNVNO = invoiceNumbers[index];
                                 console.log(`Array containing the invoice:`, iNVNO);
-                                const paidAmount=iNVNO.paidAmount;
-                                window.paidAmount=paidAmount
-                           
-                            
+                                const paidAmount = iNVNO.paidAmount;
+                                window.paidAmount = paidAmount
+
+
 
                                 document.getElementById("phoneNumber").value = iNVNO.phoneNumber || "";
                                 document.getElementById("salesMan").value = iNVNO.salesman || "";
@@ -362,7 +367,7 @@
 
                                 window.invoicebalance = iNVNO.balanceAmount
                                 window.invoiceTotal = iNVNO.totalAmount
-                                
+
 
                                 const items = iNVNO.items || []; // Assuming `iNVNO.items` contains the array of items
 
@@ -389,49 +394,89 @@
                 }
 
                 // Function to populate the table with data from `items`
-                function populateItemTable(items) {
+                async function populateItemTable(items) {
                     const tbody = document.querySelector("#itemTable tbody");
                     tbody.innerHTML = ""; // Clear existing rows
 
-                    items.forEach((item, index) => {
+                    for (const [index, item] of items.entries()) {
                         const row = document.createElement("tr");
+                        window.row = row
 
+
+                        // Fetch the stock asynchronously
+                        const stock = await fetchAvailableStock(item.itemCode);
+                        row.setAttribute("data-previous-qty", item.itemQty || 1); // Store initial quantity as an attribute
+
+                        // Set up the row with fetched stock value
                         row.innerHTML = `
-                                            <td>${index + 1}</td>
-                                            <td>
-                                                <input type="number" class="item-code-input" list="item-code-suggestions" 
-                                                    placeholder="Item Code" value="${item.itemCode || ""}">
-                                                <datalist id="item-code-suggestions"></datalist>
-                                            </td>
-                                            <td>
-                                                <input type="text" class="item-name-input" list="item-name-suggestions" 
-                                                    placeholder="Item Name" value="${item.itemName || ""}">
-                                                <datalist id="item-name-suggestions"></datalist>
-                                            </td>
-                                            <td><input type="number" class="qty-input" oninput="validateQty(this)" 
-                                                placeholder="Qty" value="${item.itemQty || 0}"></td>
-                                            <td><input type="text" class="unit-input" placeholder="Unit" 
-                                                value="${item.itemUnit || ""}" readonly></td>
-                                            <td><input type="number" class="rate-input" oninput="calculateAmount(this)" 
-                                                placeholder="Rate" value="${item.itemRate || 0}"></td>
-                                            <td><span class="amount-text">${(item.itemAmount || 0).toFixed(2)}</span></td>
-                                            <td><span class="mrp">${(item.itemMRP || 0).toFixed(2)}</span></td>
-                                            <td>
-                                                <span class="delete-btn" onclick="deleteRow(this)">
-                                                    <img src="./icons/cross.png" width="15px" alt="">
-                                                </span>
-                                            </td>
-                                       `;
-
-                        // Add delete functionality for the delete button
-                        row.querySelector(".delete-btn").addEventListener("click", () => {
-                            row.remove();
-                            updateSerialNumbers(); // Update serial numbers after deleting a row
-                        });
+                                <td>${index + 1}</td>
+                                <td>
+                                    <input type="number" class="item-code-input" list="item-code-suggestions" 
+                                        placeholder="Item Code" value="${item.itemCode || ""}">
+                                    <datalist id="item-code-suggestions"></datalist>
+                                </td>
+                                <td>
+                                    <input type="text" class="item-name-input" list="item-name-suggestions" 
+                                        placeholder="Item Name" value="${item.itemName || ""}">
+                                    <datalist id="item-name-suggestions"></datalist>
+                                </td>
+                                <td>
+                                    <input type="number" class="qty-input" placeholder="Qty" 
+                                        value="${item.itemQty || 0}" oninput="calculateAmount(this); validateQty(this);">
+                                </td>
+                                <td>
+                                    <input type="text" class="unit-input" placeholder="Unit" 
+                                        value="${item.itemUnit || ""}" readonly>
+                                </td>
+                                <td>
+                                    <input type="number" class="rate-input" placeholder="Rate" 
+                                        value="${item.itemRate || 0}" oninput="calculateAmount(this);">
+                                </td>
+                                <td>
+                                    <span class="amount-text">${(item.itemAmount || 0).toFixed(2)}</span>
+                                </td>
+                                <td>
+                                    <span class="mrp">${(item.itemMRP || 0).toFixed(2)}</span>
+                                </td>
+                                <td>
+                                    <span class="stock">${stock || 0}</span>
+                                </td>
+                                <td>
+                                    <span class="delete-btn" onclick="deleteRow(this)">
+                                        <img src="./icons/cross.png" width="15px" alt="Delete">
+                                    </span>
+                                </td>
+                            `;
 
                         tbody.appendChild(row);
-                    });
+                    }
                 }
+
+                // Async function to fetch available stock
+                async function fetchAvailableStock(itemCode) {
+                    if (!itemCode) {
+                        console.warn("Item code is required to fetch stock.");
+                        return 0;
+                    }
+
+                    try {
+                        const itemDocRef = doc(db, "inventory", itemCode);
+                        const itemDoc = await getDoc(itemDocRef);
+
+                        if (itemDoc.exists()) {
+                            const itemData = itemDoc.data();
+                            return itemData.stock || 0; // Return the stock value
+                        } else {
+                            console.warn(`Item with code "${itemCode}" does not exist.`);
+                            return 0;
+                        }
+                    } catch (error) {
+                        console.error("Error fetching stock:", error);
+                        return 0; // Return 0 in case of error
+                    }
+                }
+
+
 
                 // Function to update serial numbers
                 function updateSerialNumbers() {
@@ -448,8 +493,59 @@
 
 
 
+            async function handleQuantityChange(row) {
+                const itemCodeInput = row.querySelector(".item-code-input");
+                const qtyInput = row.querySelector(".qty-input");
 
+                if (!itemCodeInput || !qtyInput) {
+                    console.error("Row structure is incorrect. Missing required inputs.");
+                    console.log("Row content:", row.innerHTML); // Debugging output
+                    return; // Skip this row
+                }
 
+                const itemCode = itemCodeInput.value.trim();
+                const latestQuantity = parseInt(qtyInput.value.trim(), 10) || 0;
+                const previousQuantity = parseInt(row.getAttribute("data-previous-qty")) || 0;
+
+                if (!itemCode || latestQuantity === previousQuantity) {
+                    return; // No item code or no change in quantity
+                }
+
+                try {
+                    // Reference to the inventory document in Firestore
+                    const inventoryRef = doc(db, "inventory", itemCode);
+                    const docSnap = await getDoc(inventoryRef);
+
+                    if (docSnap.exists()) {
+                        const stock = docSnap.data().stock || 0;
+                        const totalStock = stock + previousQuantity;
+
+                        let newStock;
+                        if (latestQuantity > previousQuantity) {
+                            const difference = latestQuantity - previousQuantity;
+                            if (difference > totalStock) {
+                                showAlert("Insufficient stock to complete the transaction.", 3000);
+                                qtyInput.value = previousQuantity; // Revert to previous quantity
+                                return;
+                            }
+                            newStock = totalStock - latestQuantity;
+                        } else {
+                            newStock = totalStock - latestQuantity;
+                        }
+
+                        await updateDoc(inventoryRef, { stock: newStock });
+                        row.setAttribute("data-previous-qty", latestQuantity); // Update previous quantity to the new value
+                        console.log("Stock updated successfully.");
+                    } else {
+                        showAlert("Item code not found in inventory.", 3000);
+                        qtyInput.value = previousQuantity; // Revert to previous quantity
+                    }
+                } catch (error) {
+                    console.error("Error handling quantity change:", error);
+                    showAlert("Error updating stock. Please try again.", 3000);
+                    qtyInput.value = previousQuantity; // Revert to previous quantity
+                }
+            }
 
 
 
@@ -477,56 +573,6 @@
 
 
 
-            window.updateStock = async (itemCode, quantity) => {
-                try {
-                    const itemDocRef = doc(db, "inventory", itemCode);
-                    const itemDocSnap = await getDoc(itemDocRef);
-
-                    if (itemDocSnap.exists()) {
-                        const currentStock = itemDocSnap.data().stock || 0;
-
-                        if (currentStock < quantity) {
-                            showAlert("Insufficient stock available!", 2500);
-                            return false;
-                        }
-
-                        const newStock = currentStock - quantity;
-
-                        await updateDoc(itemDocRef, { stock: newStock });
-                        console.log(`Stock updated for ${itemCode}: ${newStock}`);
-                        return true;
-                    } else {
-                        showAlert(`Item with code ${itemCode} not found in the database.`, 2500);
-                        return false;
-                    }
-                } catch (error) {
-                    console.error("Error updating stock:", error);
-                    return false;
-                }
-            };
-
-            const saveData = async () => {
-
-                if (!validateTable()) {
-                    return; // Stop further execution if validation fails
-                }
-                const rows = document.querySelectorAll("#itemTable tbody tr");
-
-                for (const row of rows) {
-                    const itemCode = row.querySelector(".item-code-input").value.trim();
-                    const quantity = parseInt(row.querySelector(".qty-input").value.trim(), 10);
-
-                    if (itemCode && quantity > 0) {
-                        const stockUpdated = await window.updateStock(itemCode, quantity);
-                        if (!stockUpdated) {
-                            return false; // Stop if any stock update fails
-                        }
-                    }
-                }
-
-
-                return true;
-            };
 
 
 
@@ -712,7 +758,14 @@
 
                         await updateDoc(doc(db, "bills", docIdToUpdate), {
                             invoiceNumbers: updatedInvoice,
+
                         });
+
+                        //add stock managememt call
+                        const rows = document.querySelectorAll("#itemTable tr"); // Adjust selector as per your table ID
+                        for (const row of rows) {
+                            await handleQuantityChange(row);
+                        }
 
                         showAlert("Invoice updated successfully!", 3000);
                     } else {
@@ -786,6 +839,7 @@
 
 
 
+
             additem = () => {
                 addRow();
             }
@@ -797,28 +851,41 @@
             maxrow = 15
             let rowCount = 0;
 
+            // Enable Add Item button only if the current row is complete
+            // const enableAddButton = () => {
+            //     const rows = itemTable.querySelectorAll('tr');
+            //     const lastRow = rows[rows.length - 1];
+            //     const inputs = lastRow.querySelectorAll('input:not([readonly])');
+            //     const allFilled = Array.from(inputs).every(input => input.value.trim() !== "");
+            //     addItemButton.disabled = !allFilled;
+            // };
+
             // Add a new row to the table
             const addRow = () => {
                 rowCount++;
                 const row = document.createElement("tr");
+                window.row = row
                 row.innerHTML = `
-                            <td>${rowCount}</td>
-                            <td>
-                                <input type="number" class="item-code-input" list="item-code-suggestions" placeholder="Item Code">
-                                <datalist id="item-code-suggestions"></datalist>
-                            </td>
-                            <td>
-                                <input type="text" class="item-name-input" list="item-name-suggestions" placeholder="Item Name">
-                                <datalist id="item-name-suggestions"></datalist>
-                            </td>
-                            <td><input type="number" class="qty-input" oninput="validateQty(this)" placeholder="Qty"></td>
-                            <td><input type="text" class="unit-input" placeholder="Unit" readonly></td>
-                            <td><input type="number" class="rate-input" oninput="calculateAmount(this)" placeholder="Rate"></td>
-                            <td><span class="amount-text">0</span></td>
-                            <td><span class="mrp">0</span></td>
-                            <td><span class="delete-btn" onclick="deleteRow(this)"><img src="./icons/cross.png" width="15px" alt=""></span></td>
-                        `;
+        <td>${rowCount}</td>
+        <td>
+            <input type="number" class="item-code-input" list="item-code-suggestions" placeholder="Item Code">
+            <datalist id="item-code-suggestions"></datalist>
+        </td>
+        <td>
+            <input type="text" class="item-name-input" list="item-name-suggestions" placeholder="Item Name">
+            <datalist id="item-name-suggestions"></datalist>
+        </td>
+        <td><input type="number" class="qty-input" oninput="validateQty(this)" placeholder="Qty"></td>
+        <td><input type="text" class="unit-input" placeholder="Unit" readonly></td>
+        <td><input type="number" class="rate-input" placeholder="Rate"></td>
+        <td><span class="amount-text">0</span></td>
+        <td><span class="mrp">0</span></td>
+        <td><span class="stock">0</span></td>
+        <td><span class="delete-btn" onclick="deleteRow(this)"><img src="./icons/cross.png" width="15px" alt=""></span></td>
+    `;
                 itemTable.appendChild(row);
+
+                attachAutoCalculationListeners(row);
 
                 // Attach event listeners for item code and item name
                 const itemCodeInput = row.querySelector(".item-code-input");
@@ -858,6 +925,7 @@
                         row.querySelector(".item-name-input").value = item.itemName || "";
                         row.querySelector(".unit-input").value = item.unit || "";
                         row.querySelector(".mrp").textContent = item.mrp || 0;
+                        row.querySelector(".stock").textContent = item.stock || 0;
                         row.dataset.stock = item.stock || 0; // Store stock in the row dataset
                     } else {
                         alert("Item not found.");
@@ -867,15 +935,28 @@
 
             // Validate quantity input
             const validateQty = (qtyInput) => {
-                const row = qtyInput.closest("tr");
-                const stock = parseInt(row.dataset.stock, 10) || 0;
-                const qty = parseInt(qtyInput.value, 10) || 0;
+                const row = qtyInput.closest("tr"); // Get the closest table row
+                const stockElement = row.querySelector(".stock"); // Find the stock element in the row
+                const stock = parseInt(stockElement.textContent, 10) || 0; // Parse stock value
+                const qty = parseInt(qtyInput.value, 10) || 0; // Parse entered quantity
 
                 if (qty > stock) {
-                    alert(`Quantity cannot exceed available stock (${stock}).`);
-                    qtyInput.value = stock; // Reset to maximum available stock
+                    alert(`The entered quantity (${qty}) exceeds the available stock (${stock}).`);
+                    qtyInput.value = stock;
                 }
             };
+
+
+
+
+
+
+
+            // Add a save button handler
+
+
+
+
 
 
 
@@ -920,31 +1001,58 @@
             };
 
 
+            // Attach onchange listeners for quantity and rate
+            // Attach onchange listeners for quantity and rate
+            const attachAutoCalculationListeners = (row) => {
+                const qtyInput = row.querySelector(".qty-input");
+                const rateInput = row.querySelector(".rate-input");
+
+                const triggerCalculation = () => calculateAmount(row);
+
+                qtyInput.addEventListener("input", triggerCalculation);
+                rateInput.addEventListener("input", triggerCalculation);
+            };
+
+            // Function to calculate the amount dynamically
+            function calculateAmount(inputElement) {
+                const row = inputElement.closest("tr"); // Get the row
+                const qtyInput = row.querySelector(".qty-input"); // Get the quantity input
+                const rateInput = row.querySelector(".rate-input"); // Get the rate input
+                const amountText = row.querySelector(".amount-text"); // Get the amount element
+
+                const qty = parseFloat(qtyInput.value) || 0; // Parse the quantity value
+                const rate = parseFloat(rateInput.value) || 0; // Parse the rate value
+
+                // Calculate the amount
+                const amount = qty * rate;
+
+                // Update the amount text
+                amountText.textContent = amount.toFixed(2);
+
+                calculateTotalAmount(); // Recalculate the total amount whenever values are updated
+                checkAndAddRow(); // Check if a new row needs to be added
+            }
+
+
 
 
 
             // Calculate amount (unit price * quantity)
-            const calculateAmount = (input) => {
-                const row = input.closest('tr');
-                const unitPrice = row.querySelector('td:nth-child(6) input').value;
-                const quantity = row.querySelector('td:nth-child(4) input').value;
-                const amountCell = row.querySelector('td:nth-child(7) .amount-text');
-                if (unitPrice && quantity) {
-                    const amount = parseFloat(unitPrice) * parseFloat(quantity);
-                    amountCell.textContent = amount.toFixed(0);
-                } else {
-                    amountCell.textContent = '0';
-                }
+            // Calculate amount (unit price * quantity)
+            // const calculateAmount = (row) => {
+            //     const unitPrice = parseFloat(row.querySelector(".rate-input").value) || 0;
+            //     const quantity = parseFloat(row.querySelector(".qty-input").value) || 0;
+            //     const amountCell = row.querySelector(".amount-text");
 
-                calculateTotalAmount(); // Recalculate the total amount whenever values are updated
-                // enableAddButton();
-                checkAndAddRow();
-            };
+            //     const amount = unitPrice * quantity;
+            //     amountCell.textContent = amount.toFixed(2);
+
+
+            // };
 
 
 
-            const paidAmount= window.paidAmount
-            document.getElementById("initialPayment").value = paidAmount || "0";
+            const initialPayment = document.getElementById("initialPayment").value;
             const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
             const balanceAmount = parseFloat(document.getElementById("balanceAmount").textContent || "0");
 
@@ -959,7 +1067,6 @@
 
                 document.getElementById('total').textContent = sum.toFixed(0);
                 document.getElementById('credtotal').textContent = sum.toFixed(0);
-               
 
                 // Call other dependent functions, but do not modify initialPayment
                 FullPaymentCheck();
@@ -983,8 +1090,6 @@
                     updateBalance(); // Only update balance; do not modify initialPayment
                 }
             }
-
-
 
 
             document.getElementById("transactionType").addEventListener("change", () => {
@@ -1025,7 +1130,7 @@
 
 
             // Total payable amount (Example value, you can replace it dynamically)
-            let totalPayable = 1000.00; // Example total amount
+
 
 
 
@@ -1073,8 +1178,6 @@
                 }
                 updateBalance(); // Update the balance after validation
             });
-
-
             navigate.addEventListener("click", () => {
                 window.history.back();
             });
