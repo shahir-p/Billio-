@@ -250,11 +250,12 @@
     <div class="custBody ">
 
         <div class="listBox">
-            <div style="width: 60px;">S/N</div>
-            <div style="width: 150px;">Name</div>
-            <div style="width: 100px;">Total</div>
-            <div style="width: 100px;">Balance</div>
-            <div><img src="" alt="">Status</div>
+            <div style="width: 10%;">S/N</div>
+            <div style="width: 30%;">Name</div>
+            <div style="width: 15%;">Total</div>
+            <div style="width: 15%;">Balance</div>
+            <div style="width: 10%;"><img src="" alt=""> Status</div>
+
         </div>
         <div class="genListContainer" id="customer-list">
             <!-- generated list display here -->
@@ -304,11 +305,11 @@
                 listItem.classList.add("customer-item");
 
                 listItem.innerHTML = `
-                    <div style="width: 60px; ">${serialNumber++}</div>
-                    <div style="width: 150px; ">${data.customerName}</div>
-                    <div style="width: 100px;  ">${data.totalAmount}</div>
-                    <div style="width: 100px;  ">${data.balanceAmount || 0}</div>
-                    <div>
+                    <div style="width: 10%; ">${serialNumber++}</div>
+                    <div style="width: 30%; ">${data.customerName}</div>
+                    <div style="width:15%;  ">${data.totalAmount}</div>
+                    <div style="width: 15%;  ">${data.balanceAmount || 0}</div>
+                    <div style="width: 10%;">
                         <img src="./icons/${data.balanceAmount === 0 ? "paid" : "pending"}.png" alt="">
                     </div>
                 `;
@@ -356,8 +357,8 @@
                                 : null,
                         };
                     })
-                    // Filter customers with balanceAmount === 0
-                    .filter((customer) => customer.balanceAmount > 0);
+                // Filter customers with balanceAmount === 0
+
 
                 // Sort customers by the most recent transaction timestamp
                 customers.sort((a, b) => {

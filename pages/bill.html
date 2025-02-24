@@ -443,9 +443,21 @@
                         return;
                     }
                     validateTable();
-                    const oldbalance= window.crrbalanceAmount || 0;
-                    console.log("old : ",oldbalance);
+                    const oldbalance = window.crrbalanceAmount || 0;
+                    console.log("old : ", oldbalance);
+
+
+               
+               //button handler
+
+                    let creditsave = document.getElementById("creditsave");
+                    let save = document.getElementById("savefb");
+                    save.disabled = true;     // Disable the button
+                    save.style.cursor = "not-allowed";
+                    creditsave.disabled = true;     // Disable the button
+                    creditsave.style.cursor = "not-allowed";
                     
+
 
 
 
@@ -469,12 +481,18 @@
 
                         if (stockUpdated) {
                             if (action === "savePrint") {
-                                window.pdfload(); // Generate and print the PDF
-                                showAlert("Transaction saved and printed successfully!", 3000);
-                                window.location.reload();
+                        
+                                showAlert("Transaction saved and printed successfully!", 1200);
+
+                                setTimeout(()=>{
+                                    window.pdfload(); // Generate and print the PDF
+                                },1200)
+                                setTimeout(()=>{
+                                    window.location.reload();
+                                },2400)
                             } else if (action === "save") {
-                                showAlert("Transaction saved successfully!", 3000);
-                                window.location.reload();
+                                showAlert("Transaction saved successfully!", 2000);
+                               
                             }
                         } else {
                             showAlert("Error updating stock. Transaction not fully saved.", 3000);
@@ -486,7 +504,7 @@
                 }
             }
 
-            async function saveOrUpdateTransaction(customerName, phoneNumber, date, salesman,oldbalance, transactionType, transactionMode, initialPayment, totalAmount, balanceAmount) {
+            async function saveOrUpdateTransaction(customerName, phoneNumber, date, salesman, oldbalance, transactionType, transactionMode, initialPayment, totalAmount, balanceAmount) {
                 try {
                     const billsRef = collection(db, "bills");
                     const customerQuery = query(billsRef, where("customerName", "==", customerName));
@@ -623,23 +641,17 @@
 
             // Button event listeners
             document.getElementById("savefb").addEventListener("click", () => {
-                handleButtonClick("savefb", () => validateAndSaveTransaction("save"));
+
+                validateAndSaveTransaction("save");
             });
 
             document.getElementById("print").addEventListener("click", () => { window.pdfload(); });
 
             document.getElementById("creditsave").addEventListener("click", () => {
-                handleButtonClick("creditsave", () => validateAndSaveTransaction("savePrint"));
+                validateAndSaveTransaction("savePrint");
             });
 
-            // Common function to handle button disabling and execution
-            function handleButtonClick(buttonId, callback) {
-                const button = document.getElementById(buttonId);
-                if (button.disabled) return; // Prevent double clicks
-                button.disabled = true;     // Disable the button
-                button.style.cursor = "not-allowed"; // Optional: Change cursor to indicate disabled state
-                callback();                 // Execute the intended function
-            }
+
 
             // Add keyboard shortcuts
             document.addEventListener("keydown", (event) => {
@@ -923,6 +935,7 @@
 
                 calculateTotalAmount(); // Recalculate the total amount whenever values are updated
                 checkAndAddRow(); // Check if a new row needs to be added
+                FullPaymentCheck();
             };
 
 
@@ -955,6 +968,7 @@
                 const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
                 // console.log(credtotal);
 
+                console.log(transactionType);
 
                 if (transactionType === "Full Payment") {
 
@@ -967,7 +981,7 @@
             }
 
 
-            document.getElementById("transactionType").addEventListener("change", () => {
+            document.getElementById("transactionType").addEventListener("click", () => {
                 FullPaymentCheck();
             });
 

@@ -233,12 +233,12 @@
     <div class="custBody ">
         <span id="heading">Sales</span>
         <div class="listBox">
-            <div style="width: 60px; text-align: center;">S/N</div>
-            <div style="width: 150px; text-align: center;">Date</div>
-            <div style="width: 150px; text-align: center;">Name</div>
-            <div style="width: 100px; text-align: center;">Invoice</div>
-            <div style="width: 100px; text-align: center;">Amount</div>
-            <div style=" width: 100px; text-align: center;">
+            <div style="width: 10%; text-align: center;">S/N</div>
+            <div style="width: 15%; text-align: center;">Date</div>
+            <div style="width: 30%; text-align: center;">Name</div>
+            <div style="width: 15%; text-align: center;">Invoice</div>
+            <div style="width: 15%; text-align: center;">Amount</div>
+            <div style=" width: 15%; text-align: center;">
 
             </div>
         </div>
@@ -290,12 +290,12 @@
                 listItem.classList.add("customer-item");
 
                 listItem.innerHTML = `
-            <div style="width: 60px;">${serialNumber++}</div>
-            <div style="width: 150px;">${data.date}</div>
-            <div style="width: 150px;">${data.customerName}</div>
-            <div style="width: 100px;">${data.invoiceNo}</div>
-            <div style="width: 100px;">${data.amount}</div>
-            <div style="width: 100px;">
+            <div style="width: 10%;">${serialNumber++}</div>
+            <div style="width: 15%;">${data.date}</div>
+            <div style="width: 30%;">${data.customerName}</div>
+            <div style="width: 15%;">${data.invoiceNo}</div>
+            <div style="width: 15%;">${data.amount}</div>
+            <div style="width: 15%;">
                 <button class="btn btn-primary btn-sm view-button" data-invoice="${data.invoiceNo}" data-customer="${data.customerName}">
                     View
                 </button>

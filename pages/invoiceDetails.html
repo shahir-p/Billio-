@@ -162,9 +162,9 @@
                                     class=" input"></span>
                         </div>
                         <div class="buttonGroup">
-                            <!-- <div class="buttons" id="print" style="background-color: rgb(211, 173, 0);">Print</div> -->
-                            <div class="buttons" id="savefb" style="background-color: rgb(5, 165, 173);">Update</div>
-                            <div class="buttons" id="creditsave">Save & Print</div>
+                            <div class="buttons" id="print" style="background-color: rgb(211, 173, 0);display: none;">Print</div>
+                            <div class="buttons" id="savefb" style="background-color: rgb(5, 165, 173);display: none;" >Update</div>
+                            <!-- <div class="buttons" id="creditsave" style="display: none;">Save & Print</div> -->
                         </div>
                     </div>
                 </div>
@@ -389,6 +389,10 @@
                     } else {
                         // Show an alert if all data is fetched
                         showAlert("All data successfully fetched!", 1000);
+                        let print = document.getElementById("print");
+                        let save = document.getElementById("savefb");
+                        save.style.display="flex";
+                        print.style.display="flex";
                     }
                 } catch (error) {
                     console.error("Error checking invoice number:", error);
@@ -843,20 +847,20 @@
                 }
             });
 
+            document.getElementById("print").addEventListener("click", () => { window.pdfload(); });
 
-
-            document.getElementById("creditsave").addEventListener("click", async () => {
-                try {
-                    const invoiceNo = document.getElementById("invoiceNumber").value.trim(); // Ensure invoice number is provided
-                    if (!invoiceNo) {
-                        showAlert("Invoice number is required!", 3000);
-                        return;
-                    }
-                    await validateAndSaveTransaction("savePrint", invoiceNo);
-                } catch (error) {
-                    console.error("Error during creditsave action:", error);
-                }
-            });
+            // document.getElementById("creditsave").addEventListener("click", async () => {
+            //     try {
+            //         const invoiceNo = document.getElementById("invoiceNumber").value.trim(); // Ensure invoice number is provided
+            //         if (!invoiceNo) {
+            //             showAlert("Invoice number is required!", 3000);
+            //             return;
+            //         }
+            //         await validateAndSaveTransaction("savePrint", invoiceNo);
+            //     } catch (error) {
+            //         console.error("Error during creditsave action:", error);
+            //     }
+            // });
 
 
 
@@ -866,10 +870,11 @@
                     // Ctrl + S for Save
                     event.preventDefault(); // Prevent the browser's default save dialog
                     document.getElementById("savefb").click();
-                } else if (event.key === "F4") {
-                    // F4 for Save & Print
-                    document.getElementById("creditsave").click();
-                }
+                } else  if (event.ctrlKey && event.key === "p") {
+                    // Ctrl + P for Print
+                    event.preventDefault(); // Prevent the browser's default print dialog
+                    document.getElementById("print").click();
+                } 
             });
 
 
@@ -1133,7 +1138,7 @@
             }
 
 
-            document.getElementById("transactionType").addEventListener("change", () => {
+            document.getElementById("transactionType").addEventListener("click", () => {
                 FullPaymentCheck();
             });
 
