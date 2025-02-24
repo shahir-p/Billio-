@@ -27,13 +27,14 @@
         </div>
         <div class="searchbox ">
             <div class="filterBox">
+
                 <select id="filter" required>
-                    <option value="all">All</option>
-                    <option value="pending">Pending</option>
-                    <option value="cleared">Cleared</option>
+                    <option value="all">Stock</option>
+                    <option value="pending">Low-High</option>
+                    <option value="cleared">High-Low</option>
+                </select>
+                <input type="text" placeholder="&#128270;Enter Customer Name " id="searchField">
             </div>
-            <input type="text" placeholder="&#128270;Enter Customer Name " id="searchField">
-        </div>
 
 
 
@@ -242,25 +243,25 @@
         newRow.setAttribute("data-modified", "false"); // Flag to track if the row is modified
 
         newRow.innerHTML = `
-    <td></td>
-    <td><input type="text" class="form-control item-code" value="${data.itemCode || ''}" /></td>
-    <td><input type="text" class="form-control item-name" value="${data.itemName || ''}" /></td>
-    <td class="stockCell"><input type="text" class="form-control stock" value="${data.stock || '0'}" /></td>
-    <td><input type="number" class="form-control total-qty" value="${data.totalQty || data.stock || ''}" readonly /></td>
-    <td>
-      <select class="form-control">
-        <option value="Pcs" ${data.unit === 'Pcs' ? 'selected' : ''}>Pcs</option>
-        <option value="Dozen" ${data.unit === 'Dozen' ? 'selected' : ''}>Dozen</option>
-        <option value="Liter" ${data.unit === 'Liter' ? 'selected' : ''}>Liter</option>
-        <option value="Box" ${data.unit === 'Box' ? 'selected' : ''}>Box</option>
-      </select>
-    </td>
-    <td><input type="number" class="form-control" step="0.01" value="${data.mrp || '0'}" /></td>
-    <td><input type="date" class="form-control" value="${data.expiry ? new Date(data.expiry).toISOString().split('T')[0] : ''}" /></td>
-    <td>
-      <button class="btn btn-danger1 btn-sm delete-row" style="display: none;">Delete</button>
-    </td>
-  `;
+                            <td></td>
+                            <td><input type="text" class="form-control item-code" value="${data.itemCode || ''}" /></td>
+                            <td><input type="text" class="form-control item-name" value="${data.itemName || ''}" /></td>
+                            <td class="stockCell"><input type="text" class="form-control stock" value="${data.stock || '0'}" /></td>
+                            <td><input type="number" class="form-control total-qty" value="${data.totalQty || data.stock || ''}" readonly /></td>
+                            <td>
+                            <select class="form-control">
+                                <option value="Pcs" ${data.unit === 'Pcs' ? 'selected' : ''}>Pcs</option>
+                                <option value="Dozen" ${data.unit === 'Dozen' ? 'selected' : ''}>Dozen</option>
+                                <option value="Liter" ${data.unit === 'Liter' ? 'selected' : ''}>Liter</option>
+                                <option value="Box" ${data.unit === 'Box' ? 'selected' : ''}>Box</option>
+                            </select>
+                            </td>
+                            <td><input type="number" class="form-control" step="0.01" value="${data.mrp || '0'}" /></td>
+                            <td><input type="date" class="form-control" value="${data.expiry ? new Date(data.expiry).toISOString().split('T')[0] : ''}" /></td>
+                            <td>
+                            <button class="btn btn-danger1 btn-sm delete-row" style="display: none;">Delete</button>
+                            </td>
+                        `;
 
         tableBody.appendChild(newRow);
         updateSerialNumbers();
@@ -368,6 +369,59 @@
             }
         });
     }
+
+
+    document.getElementById("filter").addEventListener("change", (event) => {
+        const sortOption = event.target.value; // Get selected option
+        const rowsArray = Array.from(tableBody.querySelectorAll("tr")); // Convert rows to an array
+
+        if (sortOption === "pending") {
+            // Sort Low-High
+            rowsArray.sort((rowA, rowB) => {
+                const stockA = parseFloat(rowA.querySelector(".stock").value) || 0;
+                const stockB = parseFloat(rowB.querySelector(".stock").value) || 0;
+                return stockA - stockB;
+            });
+        } else if (sortOption === "cleared") {
+            // Sort High-Low
+            rowsArray.sort((rowA, rowB) => {
+                const stockA = parseFloat(rowA.querySelector(".stock").value) || 0;
+                const stockB = parseFloat(rowB.querySelector(".stock").value) || 0;
+                return stockB - stockA;
+            });
+        } else if (sortOption === "all") {
+            // Do nothing for "all"
+            return;
+        }
+
+        // Append sorted rows back to the table body
+        rowsArray.forEach((row) => tableBody.appendChild(row));
+
+        // Update serial numbers after sorting
+        updateSerialNumbers();
+    });
+
+
+    document.getElementById("searchField").addEventListener("input", (event) => {
+        const searchValue = event.target.value.toLowerCase(); // Get the search input and convert it to lowercase
+        const rows = tableBody.querySelectorAll("tr"); // Get all table rows
+
+        rows.forEach((row) => {
+            const customerNameCell = row.querySelector(".item-name"); // Adjust selector if the customer name is in another column
+            const customerName = customerNameCell ? customerNameCell.value.toLowerCase() : ""; // Get the name value and convert it to lowercase
+
+            // Show the row if the name includes the search input, otherwise hide it
+            if (customerName.includes(searchValue)) {
+                row.style.display = ""; // Show the row
+            } else {
+                row.style.display = "none"; // Hide the row
+            }
+        });
+
+        // Optionally, update serial numbers for visible rows
+        updateSerialNumbers();
+    });
+
 
 
 

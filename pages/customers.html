@@ -71,7 +71,7 @@
             /* width: 100%; */
             border-radius: 10px;
             border: 1px solid;
-
+            padding-left: 10px;
         }
 
         .navIcons {
@@ -329,14 +329,24 @@
 
         // Function to fetch all customers in real-time
         // Function to fetch all customers and sort by the latest transaction timestamp
+        // Fetch all customers in real-time with filtering
         function fetchAllCustomersRealTime() {
             if (unsubscribe) {
                 unsubscribe(); // Unsubscribe from previous listeners
             }
 
+            const filter = document.getElementById("filter").value; // Get selected filter value
             const customersRef = collection(db, "bills");
+            let customerQuery = customersRef;
 
-            unsubscribe = onSnapshot(customersRef, (snapshot) => {
+            // Apply filtering based on balanceAmount
+            if (filter === "pending") {
+                customerQuery = query(customersRef, where("balanceAmount", ">", 0));
+            } else if (filter === "cleared") {
+                customerQuery = query(customersRef, where("balanceAmount", "==", 0));
+            }
+
+            unsubscribe = onSnapshot(customerQuery, (snapshot) => {
                 const customers = snapshot.docs
                     .map((doc) => {
                         const data = doc.data();
@@ -356,9 +366,7 @@
                                 ? latestTransaction.timestamp
                                 : null,
                         };
-                    })
-                // Filter customers with balanceAmount === 0
-
+                    });
 
                 // Sort customers by the most recent transaction timestamp
                 customers.sort((a, b) => {
@@ -368,6 +376,9 @@
                 renderCustomerList(customers);
             });
         }
+
+        // Attach event listener to the filter dropdown
+        document.getElementById("filter").addEventListener("change", fetchAllCustomersRealTime);
 
 
         // Function to fetch customers by name

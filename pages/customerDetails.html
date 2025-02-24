@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./icons/cust details.png" type="image/x-icon">
     <title>Customer Details</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js" type="module"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js" type="module"></script>
@@ -75,6 +76,7 @@
             border-radius: 20px;
             width: 49%;
             column-gap: 20px;
+
         }
 
         thead tr th {
@@ -106,6 +108,26 @@
             display: flex;
             justify-content: space-around;
             width: 100%;
+        }
+
+        .tablebox {
+            max-height: 350px;
+            overflow-y: auto;
+        }
+
+        #phoneNumber {
+            height: 40px;
+            width: 250px;
+            border-radius: 8px;
+            padding-left: 10px;
+            margin-left: 10px;
+        }
+
+        #saveButton {
+            border: none;
+            border-radius: 5px;
+            margin-left: 8px;
+            display: none;
         }
 
         @media (max-width: 992px) {
@@ -173,7 +195,13 @@
             <div>
                 <h4 class="mt-2">Name: <span id="customerName">Loading...</span></h4>
 
-                <h5 class="mt-">Phone Number : <span id="phoneNumber">Loading...</span></h5>
+                <h5 class="d-flex justify-content-center align-items-center">Phone Number : <input type="number"
+                        id="phoneNumber" placeholder="loading...">
+                    <div id="saveButton" >
+                        <img width="30px" src="./icons/save.png" alt="">
+                    </div>
+                </h5>
+
 
             </div>
             <div class="colorBox">
@@ -189,40 +217,44 @@
 
         <div class=" mt-3 gridBox">
             <div class=" tableOuter  p-2 mt-2">
-                <h5 class="">Product Items :</h5>
-                <table class="table table-bordered border   mt-4">
-                    <thead>
-                        <tr>
-                            <th>S/N</th>
-                            <th>Date</th>
-                            <th>Invoice No</th>
-                            <th></th>
+                <h5 class="">All Invoices :</h5>
+                <div class="tablebox">
+                    <table class="table table-bordered border   mt-4">
+                        <thead>
+                            <tr>
+                                <th>S/N</th>
+                                <th>Date</th>
+                                <th>Invoice No</th>
+                                <th></th>
 
-                        </tr>
-                    </thead>
-                    <tbody id="productTableBody">
-                        <!-- Products will be added here -->
-                    </tbody>
-                </table>
+                            </tr>
+                        </thead>
+                        <tbody id="productTableBody">
+                            <!-- Products will be added here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <div id="history" class=" tableOuter  mt-2 p-2 ">
                 <h5 class="">Payment History :</h5>
-                <table class="table table-bordered border  mt-4">
-                    <thead>
-                        <tr>
-                            <th>S/N</th>
-                            <th>Date</th>
-                            <th>Time</th>
-                            <th>Paid Amount</th>
-                            <th>Mode</th>
-                        </tr>
-                    </thead>
-                    <tbody id="paymentHistoryTableBody">
+                <div class="tablebox">
+                    <table class="table table-bordered border  mt-4">
+                        <thead>
+                            <tr>
+                                <th>S/N</th>
+                                <th>Date</th>
+                                <th>Time</th>
+                                <th>Paid Amount</th>
+                                <th>Mode</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentHistoryTableBody">
 
-                        <!-- Payment history will be added here -->
-                    </tbody>
-                </table>
+                            <!-- Payment history will be added here -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -311,8 +343,8 @@
                     const numberPhone = customerData.phoneNumber;
                     const totalPaid = totalAmount - currentBalance || 0;
                     let trpaidsum = 0;
-                    const tritem = transactionHistory.forEach((item) => {trpaidsum += item.paidAmount}); //fetched total paid
-                    
+                    const tritem = transactionHistory.forEach((item) => { trpaidsum += item.paidAmount }); //fetched total paid
+
 
 
 
@@ -320,7 +352,7 @@
                     document.getElementById("totalPaid").textContent = trpaidsum;
                     document.getElementById("totalAmount").textContent = totalAmount;
                     document.getElementById("balanceAmount").textContent = currentBalance;
-                    document.getElementById("phoneNumber").textContent = numberPhone;
+                    document.getElementById("phoneNumber").value = numberPhone;
 
                     const payButton = document.getElementById('payButton');
                     if (currentBalance === 0) {
@@ -348,6 +380,57 @@
                 console.error("Error fetching customer data: ", error);
             }
         }
+        // Function to update phone number
+        async function updatePhoneNumber(newPhoneNumber) {
+            try {
+                if (!customerDocId) {
+                    console.error("Customer document ID not available.");
+                    return;
+                }
+
+                // Validate the phone number (10 digits only)
+                if (!/^\d{10}$/.test(newPhoneNumber)) {
+                   showAlert("Please enter a valid 10-digit phone number.",1500);
+                    return;
+                }
+
+                const customerRef = doc(db, "bills", customerDocId);
+
+                // Update the phone number in Firestore
+                await updateDoc(customerRef, {
+                    phoneNumber: newPhoneNumber
+                });
+
+                // Update the DOM to reflect the new phone number
+                document.getElementById("phoneNumber").value = newPhoneNumber;
+
+                showAlert("Phone number updated successfully.",1000);
+
+                setTimeout(() => {
+                    location.reload();
+                }, 1000);
+                
+            } catch (error) {
+                console.error("Error updating phone number: ", error);
+                alert("Failed to update phone number. Please try again.");
+            }
+        }
+
+        // Event listener for Save button
+        document.getElementById("saveButton").addEventListener("click", () => {
+            const newPhoneNumber = document.getElementById("phoneNumber").value;
+
+            // Call updatePhoneNumber with the entered phone number
+            updatePhoneNumber(newPhoneNumber);
+        });
+        document.getElementById("phoneNumber").addEventListener("change", (event) => {
+            const save=document.getElementById("saveButton")
+            save.style.display="flex"
+
+            // Call updatePhoneNumber with validation built-in
+           
+        });
+
 
         function displayInvoices(invoiceNumbers) {
             const productTableBody = document.getElementById("productTableBody");

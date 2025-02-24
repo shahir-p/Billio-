@@ -96,7 +96,7 @@
                         <div>
                             <label for="transactionType" class="form-label">Transaction Type:</label>
                             <select id="transactionType" class="form-control  inputTrans" required>
-                                <option value="Full Payment">Full Payment</option>
+                                <option value="FullPayment">Full Payment</option>
                                 <option value="credit">Credit</option>
 
 
@@ -491,7 +491,10 @@
                                     window.location.reload();
                                 },2400)
                             } else if (action === "save") {
-                                showAlert("Transaction saved successfully!", 2000);
+                                showAlert("Transaction saved successfully!", 1500);
+                                setTimeout(()=>{
+                                    window.location.reload();
+                                },1500)
                                
                             }
                         } else {
@@ -929,7 +932,9 @@
                 const unitPrice = parseFloat(row.querySelector(".rate-input").value) || 0;
                 const quantity = parseFloat(row.querySelector(".qty-input").value) || 0;
                 const amountCell = row.querySelector(".amount-text");
-
+                const credtotal = parseFloat(document.getElementById("credtotal").textContent || "0");
+                const initialPaymentInput = document.getElementById('initialPayment').value;
+              
                 const amount = unitPrice * quantity;
                 amountCell.textContent = amount.toFixed(2);
 
@@ -964,13 +969,13 @@
             function FullPaymentCheck() {
                 const transactionType = document.getElementById("transactionType").value;
                 const credtotal = parseFloat(document.getElementById("credtotal").textContent || "0");
-                const initialPaymentInput = document.getElementById('initialPayment').value;
+                const initialPaymentInput = document.getElementById('initialPayment');
                 const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
                 // console.log(credtotal);
 
                 console.log(transactionType);
 
-                if (transactionType === "Full Payment") {
+                if (transactionType ==="FullPayment") {
 
                     document.getElementById("balanceAmount").textContent = "0";
                     initialPaymentInput.value = totalAmount
