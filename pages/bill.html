@@ -443,6 +443,9 @@
                         return;
                     }
                     validateTable();
+                    const oldbalance= window.crrbalanceAmount || 0;
+                    console.log("old : ",oldbalance);
+                    
 
 
 
@@ -453,6 +456,7 @@
                         phoneNumber,
                         date,
                         salesman,
+                        oldbalance,
                         transactionType,
                         transactionMode,
                         initialPayment,
@@ -482,7 +486,7 @@
                 }
             }
 
-            async function saveOrUpdateTransaction(customerName, phoneNumber, date, salesman, transactionType, transactionMode, initialPayment, totalAmount, balanceAmount) {
+            async function saveOrUpdateTransaction(customerName, phoneNumber, date, salesman,oldbalance, transactionType, transactionMode, initialPayment, totalAmount, balanceAmount) {
                 try {
                     const billsRef = collection(db, "bills");
                     const customerQuery = query(billsRef, where("customerName", "==", customerName));
@@ -525,6 +529,7 @@
                                 transactionType,
                                 date,
                                 salesman,
+                                oldbalance,
                                 customerName,
                                 phoneNumber,
                                 items: newItems,
@@ -577,6 +582,7 @@
                                     transactionType,
                                     date,
                                     salesman,
+                                    oldbalance,
                                     customerName,
                                     phoneNumber,
                                     items: newItems,

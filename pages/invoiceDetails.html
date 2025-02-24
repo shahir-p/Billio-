@@ -152,7 +152,7 @@
 
                     <div class="bottomRow">
                         <div class="rowGrid">
-                            <!-- <span>Old Balance : <span id="currentBalance"></span></span> -->
+                            <span>Old Balance : <span id="currentBalance"></span></span>
                             <span style="color: red;">Running Balance : <span id="balanceAmount"></span></span>
                         </div>
                         <div class="rowGrid">
@@ -364,6 +364,7 @@
                                 });
                                 document.getElementById("credtotal").textContent = iNVNO.totalAmount || "";
                                 document.getElementById("balanceAmount").textContent = iNVNO.balanceAmount || "0";
+                                document.getElementById("currentBalance").textContent = iNVNO.oldbalance || "0";
 
 
 
@@ -693,7 +694,7 @@
 
 
                         // Match customer name for total and balance updates
-                        async function calculateTotalBalanceAmount() {
+                        async function calculateTotalBalanceAmount(name) {
                             try {
                                 const billsCollectionRef = collection(db, "bills");
                                 const billsSnapshot = await getDocs(billsCollectionRef);
@@ -703,15 +704,19 @@
 
                                 billsSnapshot.forEach((doc) => {
                                     const data = doc.data();
-                                    const invoiceNumbers = data.invoiceNumbers || []; // Ensure invoiceNumbers exists
 
-                                    invoiceNumbers.forEach((invoice) => {
-                                        totalBalanceAmount += invoice.balanceAmount || 0; // Add balanceAmount, default to 0 if undefined
-                                    });
+                                    // Check if the customerName matches the provided name
+                                    if (data.customerName === name) {
+                                        const invoiceNumbers = data.invoiceNumbers || []; // Ensure invoiceNumbers exists
 
-                                    invoiceNumbers.forEach((total) => {
-                                        fulltotalAmount += total.totalAmount || 0; // Add totalAmount, default to 0 if undefined
-                                    });
+                                        invoiceNumbers.forEach((invoice) => {
+                                            totalBalanceAmount += invoice.balanceAmount || 0; // Add balanceAmount, default to 0 if undefined
+                                        });
+
+                                        invoiceNumbers.forEach((invoice) => {
+                                            fulltotalAmount += invoice.totalAmount || 0; // Add totalAmount, default to 0 if undefined
+                                        });
+                                    }
                                 });
 
                                 return { totalBalanceAmount, fulltotalAmount }; // Return both totals as an object
@@ -721,20 +726,36 @@
                         }
 
                         // Use the asynchronous function to fetch and update values
-                        calculateTotalBalanceAmount().then(({ totalBalanceAmount, fulltotalAmount }) => {
-                            console.log("Total Balance Amount:", totalBalanceAmount);
-                            console.log("Full Total Amount:", fulltotalAmount);
+                        const customerName =customerName ; // Replace with the actual customer name
+                        calculateTotalBalanceAmount(customerName)
+                            .then(async ({ totalBalanceAmount, fulltotalAmount }) => {
+                                console.log("Total Balance Amount:", totalBalanceAmount);
+                                console.log("Full Total Amount:", fulltotalAmount);
 
-                            if (data.customerName === customerName) {
-                                updateDoc(doc.ref, {
-                                    totalAmount: fulltotalAmount,
-                                    balanceAmount: totalBalanceAmount,
-                                }).catch((error) => console.error("Error updating totals:", error));
-                            }
-                        }).catch((error) => {
-                            console.error("Error in calculateTotalBalanceAmount:", error);
-                        });
+                                // Find the document for the specified customer
+                                const billsCollectionRef = collection(db, "bills");
+                                const billsSnapshot = await getDocs(billsCollectionRef);
 
+                                billsSnapshot.forEach(async (doc) => {
+                                    const data = doc.data();
+
+                                    if (data.customerName === customerName) {
+                                        try {
+                                            // Update the document with the calculated totals
+                                            await updateDoc(doc.ref, {
+                                                totalAmount: fulltotalAmount,
+                                                balanceAmount: totalBalanceAmount,
+                                            });
+                                            console.log("Totals updated successfully for:", customerName);
+                                        } catch (error) {
+                                            console.error("Error updating totals:", error);
+                                        }
+                                    }
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error in calculateTotalBalanceAmount:", error);
+                            });
                         // Find the document and invoice by `invoiceNo`
                         const invoiceIndex = (data.invoiceNumbers || []).findIndex((inv) => inv.invoiceNo === invoiceNo);
                         const historyIndex = (data.transactionHistory || []).findIndex((hist) => hist.invoiceNo === invoiceNo);
@@ -794,12 +815,13 @@
                         await handleQuantityChange(row);
                     }
 
-                    showAlert("Invoice and transaction history updated successfully!", 3000);
-
-                    // Handle "Save & Print"
                     if (action === "savePrint") {
-                        window.pdfload();
+                        // window.pdfload(); // Generate and print the PDF
                         showAlert("Transaction saved and printed successfully!", 3000);
+                        // window.location.reload();
+                    } else if (action === "save") {
+                        showAlert("Transaction saved successfully!", 3000);
+                        // window.location.reload();
                     }
                 } catch (error) {
                     console.error("Error during validation and save:", error);
@@ -841,12 +863,12 @@
 
             document.getElementById("creditsave").addEventListener("click", async () => {
                 try {
-                    const invoiceNo = document.getElementById("invoiceNoInput").value.trim(); // Ensure invoice number is provided
+                    const invoiceNo = document.getElementById("invoiceNumber").value.trim(); // Ensure invoice number is provided
                     if (!invoiceNo) {
                         showAlert("Invoice number is required!", 3000);
                         return;
                     }
-                    await handleButtonClick("creditsave", () => validateAndSaveTransaction("savePrint", invoiceNo));
+                    await validateAndSaveTransaction("savePrint", invoiceNo);
                 } catch (error) {
                     console.error("Error during creditsave action:", error);
                 }

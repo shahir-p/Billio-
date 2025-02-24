@@ -53,12 +53,13 @@
             height: 50px;
             display: flex;
             column-gap: 10px;
-          
+
 
 
 
         }
-        #filter{
+
+        #filter {
             height: 100%;
             border-radius: 10px;
             padding-left: 8px;
@@ -70,7 +71,7 @@
             /* width: 100%; */
             border-radius: 10px;
             border: 1px solid;
-           
+
         }
 
         .navIcons {
@@ -242,7 +243,7 @@
                     <option value="pending">Pending</option>
                     <option value="cleared">Cleared</option>
             </div>
-            <input type="text" placeholder= "&#128270;Enter Customer Name " id="searchField">
+            <input type="text" placeholder="&#128270;Enter Customer Name " id="searchField">
         </div>
 
     </nav>
@@ -275,13 +276,12 @@
 
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBZ_mkqt1dB2_uLRGamOxxjcOjgxntL8gY",
-            authDomain: "mill-karathur-6756d.firebaseapp.com",
-            projectId: "mill-karathur-6756d",
-            storageBucket: "mill-karathur-6756d.appspot.com",
-            messagingSenderId: "304225841532",
-            appId: "1:304225841532:web:c09b203608227e991bb4f9",
-            measurementId: "G-VRXZKDPYPX",
+            apiKey: "AIzaSyB5Dll51Ier9CDbYfS5D_VBuZCVZdz2wS0",
+            authDomain: "full-bill.firebaseapp.com",
+            projectId: "full-bill",
+            storageBucket: "full-bill.firebasestorage.app",
+            messagingSenderId: "866610694066",
+            appId: "1:866610694066:web:af68a003b7fa00fe7c86ab"
         };
 
         // Initialize Firebase and Firestore
@@ -403,34 +403,31 @@
             }
         });
 
-        navigate.addEventListener("click", () => {
-            window.location.href = './customerclassify.html';  // This will navigate to the homepage
-        });
 
 
 
         // Fetch all customers on page load
         fetchAllCustomersRealTime();
 
-        
+
     </script>
     <script>
         function home() {
-                window.location.href = "./homePage.html"
-            }
-            function newBill() {
-                window.open('./bill.html', '_blank');
+            window.location.href = "./homePage.html"
+        }
+        function newBill() {
+            window.open('./bill.html', '_blank');
 
-            }
-            function ledger(){
-                window.location.href="./ledger.html"
-            }
-            function customers(){
-                window.location.href="./customers.html"
-            }
-            function inventory(){
-                window.location.href="./inventory.html"
-            }
+        }
+        function ledger() {
+            window.location.href = "./ledger.html"
+        }
+        function customers() {
+            window.location.href = "./customers.html"
+        }
+        function inventory() {
+            window.location.href = "./inventory.html"
+        }
     </script>
 
 
