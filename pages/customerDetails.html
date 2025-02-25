@@ -531,6 +531,10 @@
                 return;
             }
 
+            let confirmPayment = document.getElementById("confirmPayment");
+            confirmPayment.disabled = true;     // Disable the button
+            confirmPayment.style.cursor = "not-allowed";
+                    
             try {
                 const customerRef = doc(db, "bills", customerDocId);
                 const currentPaid = parseFloat(document.getElementById("totalPaid").textContent);
