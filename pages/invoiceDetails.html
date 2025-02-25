@@ -100,12 +100,13 @@
                         <div>
                             <label for="transactionType" class="form-label">Transaction Type:</label>
                             <select id="transactionType" class="form-control  inputTrans" required>
-                                <option value="credit">Credit</option>
                                 <option value="Full Payment">Full Payment</option>
+                                <option value="credit">Credit</option>
 
 
                             </select>
                         </div>
+
                         <!-- </div> -->
                         <!-- <div class="inputDiv"> -->
 
@@ -357,7 +358,13 @@
                                 document.getElementById("phoneNumber").value = iNVNO.phoneNumber || "";
                                 document.getElementById("salesMan").value = iNVNO.salesman || "";
                                 document.getElementById("dateField").value = iNVNO.date || "";
-                                document.getElementById("transactionType").value = iNVNO.transactionType || "";
+                                const trType = iNVNO.transactionType;
+                                console.log(trType);
+
+                                document.getElementById("transactionType").value =iNVNO.transactionType;
+
+
+
                                 document.getElementById("transactionMode").value = iNVNO.transactionMode || "";
                                 document.getElementById("initialPayment").value = paidAmount || "0";
                                 document.getElementById("initialPayment").addEventListener("input", (e) => {
@@ -486,6 +493,13 @@
 
             // Call the function with the desired invoice number
             checkInvoiceNumber(invoiceNo);
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const transactionType = iNVNO.transactionType;
+                console.log("Transaction Type:", transactionType); // Check value
+                document.getElementById("transactionType").value = transactionType;
+            });
+
 
 
             async function handleQuantityChange(row) {
@@ -628,10 +642,10 @@
                     const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
 
                     // Validations
-                    // if (initialPayment === totalAmount && transactionType === "credit") {
-                    //     showAlert("Transaction type cannot be 'Credit' when the full amount is paid.", 2500);
-                    //     return;
-                    // }
+                    if (initialPayment === totalAmount && transactionType === "credit") {
+                        showAlert("Transaction type cannot be 'Credit' when the full amount is paid.", 2500);
+                        return;
+                    }
 
                     const tableIsValid = validateTable();
                     if (!tableIsValid) return;
@@ -1203,7 +1217,7 @@
 
 
             // credit selected
-            const transactionType = document.getElementById('transactionType');
+            // const transactionType = document.getElementById('transactionType');
             const creditFields = document.getElementById('creditFields');
             const initialPaymentInput = document.getElementById('initialPayment');
             const balanceAmountSpan = document.getElementById('balanceAmount');
@@ -1229,7 +1243,7 @@
                 if (initialPayment.value > totalAmount) {
                     initialPaymentInput.value = totalAmount;
                 }
-              
+
                 const balance = totalAmount - initialPayment;
                 console.log(balance);
 
@@ -1247,7 +1261,7 @@
 
                 const totalAmount = parseFloat(document.getElementById('credtotal').textContent) || 0;
                 const initialPayment = (document.getElementById("initialPayment"));
-                const runningBal = parseFloat(document.getElementById(""))
+
 
                 console.log(initialPayment.value, totalAmount);
 

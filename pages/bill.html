@@ -96,7 +96,7 @@
                         <div>
                             <label for="transactionType" class="form-label">Transaction Type:</label>
                             <select id="transactionType" class="form-control  inputTrans" required>
-                                <option value="FullPayment">Full Payment</option>
+                                <option value="Full Payment">Full Payment</option>
                                 <option value="credit">Credit</option>
 
 
@@ -422,6 +422,8 @@
                     const date = document.getElementById("dateField").value.trim();
                     const salesman = document.getElementById("salesMan").value.trim();
                     const transactionType = document.getElementById("transactionType").value.trim();
+                    console.log(transactionType);
+                    
                     const transactionMode = document.getElementById("transactionMode").value.trim();
                     const initialPayment = parseFloat(document.getElementById("initialPayment").value || "0");
                     const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
@@ -442,7 +444,7 @@
                         showAlert("Change Transaction type to 'Full Payment'.", 2500);
                         return;
                     }
-                    if (initialPayment < totalAmount && transactionType === "FullPayment") {
+                    if (initialPayment < totalAmount && transactionType === "Full Payment") {
                         showAlert("Change Transaction type to 'Credit'.", 2500);
                         return;
                     }
@@ -979,7 +981,7 @@
 
                 console.log(transactionType);
 
-                if (transactionType ==="FullPayment") {
+                if (transactionType ==="Full Payment") {
 
                     document.getElementById("balanceAmount").textContent = "0";
                     initialPaymentInput.value = totalAmount
