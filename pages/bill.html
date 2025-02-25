@@ -439,7 +439,11 @@
                     }
 
                     if (initialPayment === totalAmount && transactionType === "credit") {
-                        showAlert("Transaction type cannot be 'Credit' when the full amount is paid.", 2500);
+                        showAlert("Change Transaction type to 'Full Payment'.", 2500);
+                        return;
+                    }
+                    if (initialPayment < totalAmount && transactionType === "FullPayment") {
+                        showAlert("Change Transaction type to 'Credit'.", 2500);
                         return;
                     }
                     validateTable();
@@ -983,6 +987,8 @@
                     initialPaymentInput.value = "0"
                     updateBalance(); // Only update balance; do not modify initialPayment
                 }
+
+              
             }
 
 

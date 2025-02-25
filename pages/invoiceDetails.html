@@ -162,8 +162,10 @@
                                     class=" input"></span>
                         </div>
                         <div class="buttonGroup">
-                            <div class="buttons" id="print" style="background-color: rgb(211, 173, 0);display: none;">Print</div>
-                            <div class="buttons" id="savefb" style="background-color: rgb(5, 165, 173);display: none;" >Update</div>
+                            <div class="buttons" id="print" style="background-color: rgb(211, 173, 0);display: none;">
+                                Print</div>
+                            <div class="buttons" id="savefb" style="background-color: rgb(5, 165, 173);display: none;">
+                                Update</div>
                             <!-- <div class="buttons" id="creditsave" style="display: none;">Save & Print</div> -->
                         </div>
                     </div>
@@ -350,7 +352,7 @@
                                 const iNVNO = invoiceNumbers[index];
                                 console.log(`Array containing the invoice:`, iNVNO);
                                 const paidAmount = iNVNO.paidAmount;
-                                window.paidAmount = paidAmount;
+
 
                                 document.getElementById("phoneNumber").value = iNVNO.phoneNumber || "";
                                 document.getElementById("salesMan").value = iNVNO.salesman || "";
@@ -366,6 +368,7 @@
                                 document.getElementById("currentBalance").textContent = iNVNO.oldbalance || "0";
 
                                 // Passing variable to other function
+                                window.paidAmount = paidAmount;
                                 window.invoicebalance = iNVNO.balanceAmount;
                                 window.invoiceTotal = iNVNO.totalAmount;
 
@@ -391,8 +394,8 @@
                         showAlert("All data successfully fetched!", 1000);
                         let print = document.getElementById("print");
                         let save = document.getElementById("savefb");
-                        save.style.display="flex";
-                        print.style.display="flex";
+                        save.style.display = "flex";
+                        print.style.display = "flex";
                     }
                 } catch (error) {
                     console.error("Error checking invoice number:", error);
@@ -483,8 +486,6 @@
 
             // Call the function with the desired invoice number
             checkInvoiceNumber(invoiceNo);
-
-
 
 
             async function handleQuantityChange(row) {
@@ -627,10 +628,10 @@
                     const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
 
                     // Validations
-                    if (initialPayment === totalAmount && transactionType === "credit") {
-                        showAlert("Transaction type cannot be 'Credit' when the full amount is paid.", 2500);
-                        return;
-                    }
+                    // if (initialPayment === totalAmount && transactionType === "credit") {
+                    //     showAlert("Transaction type cannot be 'Credit' when the full amount is paid.", 2500);
+                    //     return;
+                    // }
 
                     const tableIsValid = validateTable();
                     if (!tableIsValid) return;
@@ -870,11 +871,11 @@
                     // Ctrl + S for Save
                     event.preventDefault(); // Prevent the browser's default save dialog
                     document.getElementById("savefb").click();
-                } else  if (event.ctrlKey && event.key === "p") {
+                } else if (event.ctrlKey && event.key === "p") {
                     // Ctrl + P for Print
                     event.preventDefault(); // Prevent the browser's default print dialog
                     document.getElementById("print").click();
-                } 
+                }
             });
 
 
@@ -1059,6 +1060,40 @@
                 rateInput.addEventListener("input", triggerCalculation);
             };
 
+
+
+            // document.getElementById('initialPayment').addEventListener('input', function (event) {
+            //     const paymentValue = event.target.value;
+
+            //     // Your logic here
+            //     console.log('Initial Payment Changed:', paymentValue);
+
+            //     // Example: Displaying an alert
+            //     if (paymentValue < 0) {
+            //         alert('Payment cannot be negative.');
+            //     } else {
+            //         // Perform actions with the value
+            //     }
+            // });
+
+            // function validateIP() {
+            //     // Get the total and initial payment values
+            //     let total = parseFloat(document.getElementById("credtotal").textContent) || 0;
+            //     let ip = parseFloat(document.getElementById("initialPayment").value) || 0;
+            //     let runningBal=parseFloat(document.getElementById("balanceAmount").textContent) || 0;
+
+            //     // Check if the initial payment exceeds the total
+            //     if (ip > total) {
+            //         document.getElementById("initialPayment").value = total; // Set the value to the total
+            //         document.getElementById("balanceAmount").textContent=total- ip
+
+
+            //     }
+
+            // }
+
+
+
             // Function to calculate the amount dynamically
             function calculateAmount(inputElement) {
                 const row = inputElement.closest("tr"); // Get the row
@@ -1138,9 +1173,9 @@
             }
 
 
-            document.getElementById("transactionType").addEventListener("click", () => {
-                FullPaymentCheck();
-            });
+            // document.getElementById("transactionType").addEventListener("click", () => {
+            //     FullPaymentCheck();
+            // });
 
 
             // Delete a row
@@ -1187,29 +1222,47 @@
             // Function to update the balance based on total amount and initial payment
             // Function to update the balance based on total amount and initial payment
             const updateBalance = () => {
-                const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
-                const initialPayment = parseFloat(initialPaymentInput.value) || 0; // Ensure initialPayment is always parsed
+                const totalAmount = parseFloat(document.getElementById('credtotal').textContent) || 0;
+                const initialPayment = parseFloat(document.getElementById("initialPayment").value) || 0; // Ensure initialPayment is always parsed
 
                 // Prevent the user from entering a value greater than the total amount
-                if (initialPayment > totalAmount) {
+                if (initialPayment.value > totalAmount) {
                     initialPaymentInput.value = totalAmount;
                 }
-
+              
                 const balance = totalAmount - initialPayment;
-                balanceAmountSpan.textContent = balance.toFixed(0);
+                console.log(balance);
+
+                document.getElementById("balanceAmount").textContent = balance
             };
 
             // Attach the `updateBalance` function to relevant events
-            initialPaymentInput.addEventListener('input', () => {
-                const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
-                const initialPayment = parseFloat(initialPaymentInput.value) || 0;
+
+
+
+            ////main changing initial payment input bug function
+
+
+            document.getElementById("initialPayment").addEventListener('input', () => {
+
+                const totalAmount = parseFloat(document.getElementById('credtotal').textContent) || 0;
+                const initialPayment = (document.getElementById("initialPayment"));
+                const runningBal = parseFloat(document.getElementById(""))
+
+                console.log(initialPayment.value, totalAmount);
+
 
                 // Validate the input value but allow updates even if totalAmount is zero
-                if (initialPayment > totalAmount) {
-                    initialPaymentInput.value = totalAmount;
+                if (initialPayment.value > totalAmount) {
+                    document.getElementById("initialPayment").value = totalAmount;
+
                 }
-                updateBalance(); // Update the balance after validation
+                updateBalance();
+                //  // Update the balance after validation
             });
+
+
+
 
             // Update balance whenever the total amount is recalculated
             const originalCalculateTotalAmount = calculateTotalAmount;
@@ -1217,16 +1270,7 @@
                 originalCalculateTotalAmount(); // Call the original function to calculate total
                 updateBalance(); // Update the balance after recalculating the total
             };
-            initialPaymentInput.addEventListener('input', () => {
-                const totalAmount = parseFloat(document.getElementById('total').textContent) || 0;
-                const initialPayment = parseFloat(initialPaymentInput.value) || 0;
 
-                // Prevent the user from entering a value greater than the total amount
-                if (initialPayment > totalAmount) {
-                    initialPaymentInput.value = totalAmount;
-                }
-                updateBalance(); // Update the balance after validation
-            });
             navigate.addEventListener("click", () => {
                 window.history.back();
             });
