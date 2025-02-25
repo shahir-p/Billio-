@@ -91,6 +91,7 @@
                             <th style="width: 10%;">Total Qty</th>
                             <th style="width: 10%;">Unit</th>
                             <th style="width: 15%;">MRP</th>
+                            <th style="width: 15%;">WSP</th>
                             <th style="width: 10%;">Expiry</th>
                             <th style="width: 5%;"></th>
                         </tr>
@@ -257,6 +258,7 @@
                             </select>
                             </td>
                             <td><input type="number" class="form-control" step="0.01" value="${data.mrp || '0'}" /></td>
+                            <td><input type="number" class="form-control" step="0.01" value="${data.wsp || '0'}" /></td>
                             <td><input type="date" class="form-control" value="${data.expiry ? new Date(data.expiry).toISOString().split('T')[0] : ''}" /></td>
                             <td>
                             <button class="btn btn-danger1 btn-sm delete-row" style="display: none;">Delete</button>
@@ -461,7 +463,7 @@
 
         for (const row of rows) {
             const inputs = row.querySelectorAll("input, select");
-            const [itemCode, itemName, stock, totalQty, unit, mrp, expiry] = inputs;
+            const [itemCode, itemName, stock, totalQty, unit, mrp,wsp, expiry] = inputs;
 
             // Check if the row has been modified or is new
             if (row.getAttribute("data-modified") === "true") {
@@ -480,6 +482,7 @@
                         totalQty: parseFloat(totalQty.value),
                         unit: unit.value.trim(),
                         mrp: parseFloat(mrp.value),
+                        wsp: parseFloat(wsp.value),
                         expiry: expiry.value ? new Date(expiry.value).toISOString() : null,
                     });
                 }

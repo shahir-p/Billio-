@@ -138,11 +138,12 @@
                                     <th style="width: 5%;">S/N</th>
                                     <th style="width: 10%;">Item Code</th>
                                     <th style="width: 20%;">Item Name</th>
-                                    <th style="width: 10%;">Qty</th>
-                                    <th style="width: 10%;">Unit</th>
+                                    <th style="width: 7%;">Qty</th>
+                                    <th style="width: 8%;">Unit</th>
                                     <th style="width: 10%;">Rate</th>
-                                    <th style="width: 15%;">Amount</th>
+                                    <th style="width: 11%;">Amount</th>
                                     <th style="width: 10%;">MRP</th>
+                                    <th style="width: 10%;">WSP</th>
                                     <th style="width: 10%;">Stock</th>
                                     <th style="width: 5%;"></th>
                                 </tr>
@@ -453,6 +454,9 @@
                     <span class="mrp">${(item.itemMRP || 0).toFixed(2)}</span>
                 </td>
                 <td>
+                    <span class="wsp">${(item.itemWSP || 0).toFixed(2)}</span>
+                </td>
+                <td>
                     <span class="stock">${stock || 0}</span>
                 </td>
                 <td>
@@ -661,6 +665,7 @@
                         const itemRate = parseFloat(row.querySelector(".rate-input").value || "0");
                         const itemAmount = parseFloat(row.querySelector(".amount-text").textContent || "0");
                         const itemMRP = parseFloat(row.querySelector(".mrp").textContent || "0");
+                        const itemWSP = parseFloat(row.querySelector(".wsp").textContent || "0");
 
                         if (!itemCode || !itemName || itemQty <= 0 || itemRate <= 0) {
                             showAlert("Each item must have valid details.", 2500);
@@ -675,6 +680,7 @@
                             itemRate,
                             itemAmount,
                             itemMRP,
+                            itemWSP,
                         });
                     });
 
@@ -941,6 +947,7 @@
         <td><input type="number" class="rate-input" placeholder="Rate"></td>
         <td><span class="amount-text">0</span></td>
         <td><span class="mrp">0</span></td>
+        <td><span class="wsp">0</span></td>
         <td><span class="stock">0</span></td>
         <td><span class="delete-btn" onclick="deleteRow(this)"><img src="./icons/cross.png" width="15px" alt=""></span></td>
     `;
@@ -986,6 +993,7 @@
                         row.querySelector(".item-name-input").value = item.itemName || "";
                         row.querySelector(".unit-input").value = item.unit || "";
                         row.querySelector(".mrp").textContent = item.mrp || 0;
+                        row.querySelector(".wsp").textContent = item.wsp || 0;
                         row.querySelector(".stock").textContent = item.stock || 0;
                         row.dataset.stock = item.stock || 0; // Store stock in the row dataset
                     } else {
