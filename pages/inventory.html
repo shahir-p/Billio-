@@ -33,7 +33,7 @@
                     <option value="pending">Low-High</option>
                     <option value="cleared">High-Low</option>
                 </select>
-                <input type="text" placeholder="&#128270;Enter Item Name " id="searchField">
+                <input type="text" placeholder="&#128270;Search Item " id="searchField">
             </div>
 
 
@@ -85,13 +85,14 @@
                     <thead>
                         <tr>
                             <th style="width: 5%;">S/N</th>
-                            <th style="width: 10%;">Item Code</th>
+                            <th style="width: 7%;">Code</th>
+                            <th style="width: 8%;">HSN</th>
                             <th style="width: 25%;">Item Name</th>
                             <th style="width: 10%;">Stock</th>
                             <th style="width: 10%;">Total Qty</th>
                             <th style="width: 10%;">Unit</th>
-                            <th style="width: 15%;">MRP</th>
-                            <th style="width: 15%;">WSP</th>
+                            <th style="width: 10%;">MRP</th>
+                            <th style="width: 10%;">WSP</th>
                             <th style="width: 10%;">Expiry</th>
                             <th style="width: 5%;"></th>
                         </tr>
@@ -246,6 +247,7 @@
         newRow.innerHTML = `
                             <td></td>
                             <td><input type="text" class="form-control item-code" value="${data.itemCode || ''}" /></td>
+                            <td><input type="text" class="form-control item-code" value="${data.hsn|| ''}" /></td>
                             <td><input type="text" class="form-control item-name" value="${data.itemName || ''}" /></td>
                             <td class="stockCell"><input type="text" class="form-control stock" value="${data.stock || '0'}" /></td>
                             <td><input type="number" class="form-control total-qty" value="${data.totalQty || data.stock || ''}" readonly /></td>
@@ -409,11 +411,14 @@
         const rows = tableBody.querySelectorAll("tr"); // Get all table rows
 
         rows.forEach((row) => {
-            const customerNameCell = row.querySelector(".item-name"); // Adjust selector if the customer name is in another column
-            const customerName = customerNameCell ? customerNameCell.value.toLowerCase() : ""; // Get the name value and convert it to lowercase
+            const itemNameCell = row.querySelector(".item-name"); // Selector for the item name column
+            const itemCodeCell = row.querySelector(".item-code"); // Selector for the item code column
 
-            // Show the row if the name includes the search input, otherwise hide it
-            if (customerName.includes(searchValue)) {
+            const itemName = itemNameCell ? itemNameCell.value.toLowerCase() : ""; // Get the item name value
+            const itemCode = itemCodeCell ? itemCodeCell.value.toLowerCase() : ""; // Get the item code value
+
+            // Show the row if either the name or code includes the search input
+            if (itemName.includes(searchValue) || itemCode.includes(searchValue)) {
                 row.style.display = ""; // Show the row
             } else {
                 row.style.display = "none"; // Hide the row
@@ -423,6 +428,7 @@
         // Optionally, update serial numbers for visible rows
         updateSerialNumbers();
     });
+
 
 
 
@@ -463,7 +469,7 @@
 
         for (const row of rows) {
             const inputs = row.querySelectorAll("input, select");
-            const [itemCode, itemName, stock, totalQty, unit, mrp,wsp, expiry] = inputs;
+            const [itemCode,hsn, itemName, stock, totalQty, unit, mrp, wsp, expiry] = inputs;
 
             // Check if the row has been modified or is new
             if (row.getAttribute("data-modified") === "true") {
@@ -476,7 +482,9 @@
                 // Add modified or new row to the data to save
                 if (itemCode.value && itemName.value) {
                     dataToSave.push({
+
                         itemCode: itemCode.value.trim(),
+                        hsn:hsn.value.trim(),
                         itemName: itemName.value.trim(),
                         stock: parseFloat(stock.value),
                         totalQty: parseFloat(totalQty.value),

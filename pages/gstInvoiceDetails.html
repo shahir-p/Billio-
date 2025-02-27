@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="./icons/invodet.png" type="image/x-icon">
+    <title> GST Invoice Details</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <!-- Firebase App (for Firebase features) -->
+    <!-- <script src="https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js"></script> -->
+    <!-- Firebase Firestore and Firebase Storage -->
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
+
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link rel="stylesheet" href="./invoiceDetails.css">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="iconDiv"><img src="./icons/home.png" title="home" onclick="home()"></div>
+        <div class="iconDiv"><img src="./icons/new bill.png" title="new bill" onclick="newBill()"></div>
+        <div class="iconDiv"><img src="./icons/ledger.png" title="ledger" onclick="ledger()"></div>
+        <div class="iconDiv"><img src="./icons/customer nav.png" alt=""></div>
+        <div class="iconDiv"><img src="./icons/debit.png" alt=""></div>
+        <div class="iconDiv"><img src="./icons/overview.png" alt=""></div>
+
+    </nav>
+    <div class="homeContainer">
+        <div id="customAlert" style="
+    display: none; 
+    position: fixed; 
+    top: 20px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    background-color: #3978de; 
+    color: white; 
+    padding: 10px 20px; 
+    border-radius: 5px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    font-size: 14px; 
+    z-index: 1000;">
+        </div>
+        <!-- Fixed billRow -->
+
+        <div class="homeBody">
+            <!-- Form to add a new product -->
+            <span id="heading">Invoice</span>
+            <div class="billBox">
+
+                <div class="form-container " id="billForm">
+                    <div class="inputboxes">
+                        <!-- <div class="inputDiv"> -->
+                        <div>
+                            <label for="invoiceNumber" class="form-label">Invoice No:</label>
+                            <!-- Input field with datalist for suggestions -->
+                            <input type="text" class="form-control input" id="invoiceNumber" placeholder="Enter invoice"
+                                list="" autocomplete="off" readonly>
+                            <!-- Datalist for customer name suggestions -->
+                            <datalist id=""></datalist>
+                        </div>
+                        <div>
+                            <label for="customerNameName" class="form-label">Customer Name:</label>
+                            <!-- Input field with datalist for suggestions -->
+                            <input type="text" class="form-control input" id="customerNameName"
+                                placeholder="Enter Customer Name" list="customerSuggestions" autocomplete="off"
+                                readonly>
+                            <!-- Datalist for customer name suggestions -->
+                            <datalist id="customerSuggestions"></datalist>
+                        </div>
+
+
+                        <div>
+                            <label for="phoneNumber" class="form-label">Phone Number:</label>
+                            <!-- Phone number field, editable if no matching customer is selected -->
+                            <input type="text" class="form-control input" id="phoneNumber"
+                                placeholder="Enter Phone Number" maxlength="10" readonly>
+                        </div>
+                        <!-- </div> -->
+                        <div>
+                            <label for="salesMan" class="form-label">Sales Man:</label>
+                            <!-- Phone number field, editable if no matching customer is selected -->
+                            <input type="name" class="form-control input" id="salesMan" placeholder="Enter Name">
+                        </div>
+
+
+
+
+                        <!-- <div class="inputDiv"> -->
+                        <div>
+                            <label for="dateField" class="form-label">Select Date:</label>
+                            <input type="text" id="dateField" class="form-control inputTrans" readonly
+                                placeholder="dd-mm-yyyy" aria-readonly="">
+
+                        </div>
+
+                        <div>
+                            <label for="transactionType" class="form-label">Transaction Type:</label>
+                            <select id="transactionType" class="form-control  inputTrans" required>
+                                <option value="Full Payment">Full Payment</option>
+                                <option value="credit">Credit</option>
+
+
+                            </select>
+                        </div>
+
+                        <!-- </div> -->
+                        <!-- <div class="inputDiv"> -->
+
+
+                        <div>
+                            <label for="transactionMode" class="form-label">Transaction Mode:</label>
+                            <select id="transactionMode" class="form-control  inputTrans" required>
+                                <option value="cash">Cash</option>
+                                <option value="UPI">UPI</option>
+                            </select>
+                        </div>
+                    </div>
+                    <!-- </div> -->
+
+
+
+
+
+                    <div class="mt-3 d-flex align-items-center ">
+                        <label for="addItemButton" class="form-label  ">Add items :</label>
+                        <button id="addItemButton" class="btn btn-primary ms-3 mb-3 text-center" onclick="additem()">Add
+                            Item</button>
+                    </div>
+
+                    <div class="tableContainer">
+                        <table class="table table-bordered" id="itemTable">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">S/N</th>
+                                    <th style="width: 10%;">Item Code</th>
+                                    <th style="width: 20%;">Item Name</th>
+                                    <th style="width: 7%;">Qty</th>
+                                    <th style="width: 8%;">Unit</th>
+                                    <th style="width: 10%;">Rate</th>
+                                    <th style="width: 11%;">Amount</th>
+                                    <th style="width: 10%;">MRP</th>
+                                    <th style="width: 10%;">WSP</th>
+                                    <th style="width: 10%;">Stock</th>
+                                    <th style="width: 5%;"></th>
+                                </tr>
+                            <tbody>
+                                <!-- Rows will be dynamically added here -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bottomRow">
+                        <div class="rowGrid">
+                            <span>Old Balance : <span id="currentBalance"></span></span>
+                            <span style="color: red;">Running Balance : <span id="balanceAmount"></span></span>
+                        </div>
+                        <div class="rowGrid">
+                            <span>Net Amount :<span id="credtotal"></span></span>
+                            <span>Paying Amount : <input type="number" name="" id="initialPayment"
+                                    class=" input"></span>
+                        </div>
+                        <div class="buttonGroup">
+                            <div class="buttons" id="print" style="background-color: rgb(211, 173, 0);display: none;">
+                                Print</div>
+                            <div class="buttons" id="savefb" style="background-color: rgb(5, 165, 173);display: none;">
+                                Update</div>
+                            <!-- <div class="buttons" id="creditsave" style="display: none;">Save & Print</div> -->
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="save  " id="save" style="display: none;">
+
+                    <div class="TOTAL">
+                        Total : <span id="total"></span>
+                    </div>
+                    <div class="print ms-3 me-2" id="save">save</div>
+                </div>
+
+
+
+
+                <!-- table -->
+
+
+            </div>
+
+
+            <div class="valuesContainer" id="values" style="display: none;">
+                <div class="values">
+                    <div id="creditFields" class="gap-0  ">
+                        <div>
+                            <label for="" class="form-label">Paying Amount:</label>
+                            <input type="number" id="" class="form-control" placeholder="Enter paying Amount">
+
+                        </div>
+
+                    </div>
+                </div>
+                <div class="values">
+                    <div class="credTotal">Total : </div>
+                </div>
+                <div class="values">
+                    <div class="TOTAL">
+                        Balance :
+                    </div>
+                </div>
+                <div class="values">
+                    <div class="print ">Save & Print</div>
+                </div>
+
+            </div>
+
+
+        </div>
+
+        <!-- firebase -->
+        <script type="module">
+            // Firebase imports
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-app.js";
+            import {
+                getFirestore,
+                collection,
+                addDoc,
+                query,
+                where,
+                getDocs,
+                updateDoc,
+                doc,
+                increment,
+                getDoc
+            } from "https://www.gstatic.com/firebasejs/11.2.0/firebase-firestore.js";
+
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyB5Dll51Ier9CDbYfS5D_VBuZCVZdz2wS0",
+                authDomain: "full-bill.firebaseapp.com",
+                projectId: "full-bill",
+                storageBucket: "full-bill.firebasestorage.app",
+                messagingSenderId: "866610694066",
+                appId: "1:866610694066:web:af68a003b7fa00fe7c86ab"
+            };
+
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+            const db = getFirestore(app);
+
+
+
+
+
+
+
+
+            // Retrieve query parameters
+            const { invoiceNo, customerName } = getQueryParams();
+
+            // Display the values on the target page
+
+            // Set the numeric part in the input box
+            document.getElementById('invoiceNumber').value = invoiceNo;
+            document.getElementById('customerNameName').value = ` ${customerName}`;
+
+            window.invoice = invoiceNo
+
+            function getQueryParams() {
+                const params = new URLSearchParams(window.location.search);
+                return {
+                    invoiceNo: params.get('invoiceNo'),
+                    customerName: params.get('customerName'),
+                };
+            }
+
+            // Use the extracted parameters
+            console.log(invoiceNo);
+            window.inv = invoiceNo
+            window.custName = customerName
+
+
+
+            const temptotal = window.invoiceTotal
+            const tempbalance = window.invoicebalance
+            async function totalAmountFetch(name) {
+                try {
+                    const billsRef = collection(db, "gst");
+                    //fetch all docs
+                    const querySnapshot = await getDocs(billsRef);
+
+                    querySnapshot.forEach((doc) => {
+                        const items = doc.data()
+
+
+                        if (!items.empty) {
+                            if (items.customerName === customerName) {
+                                const fullTotal = items.totalAmount;
+                                const fullBalance = items.balanceAmount
+                                const showBalance = fullBalance - tempbalance
+
+
+                                // document.getElementById('currentBalance').textContent = showBalance || 0
+
+                            }
+                        } else {
+                            console.log("its empty , no customer");
+
+                        }
+
+                    })
+
+
+                } catch (error) {
+                    console.error("Error checking invoice number:", error);
+                }
+            }
+            totalAmountFetch(customerName);
+
+            async function checkInvoiceNumber(invoiceNoToCheck) {
+                try {
+                    // Reference the 'bills' collection
+                    const billsRef = collection(db, "gst");
+
+                    // Fetch all documents from the 'bills' collection
+                    const querySnapshot = await getDocs(billsRef);
+
+                    let invoiceFound = false; // Track if the invoice is found
+
+                    // Iterate through each document
+                    for (const doc of querySnapshot.docs) {
+                        const data = doc.data();
+                        const invoiceNumbers = data.invoiceNumbers || []; // Ensure it's an array
+                        const transactionHistory = data.transactionHistory || []; // Ensure it's an array
+                        console.log("Checking invoice", invoiceNoToCheck);
+
+                        // Find the index of the specified invoice number
+                        const index = invoiceNumbers.findIndex(
+                            (invoice) => invoice.invoiceNo === invoiceNoToCheck
+                        );
+                        const indext = transactionHistory.findIndex(
+                            (invoice) => invoice.invoiceNo === invoiceNoToCheck
+                        );
+
+                        // If the invoice is found in either array
+                        if (index !== -1 || indext !== -1) {
+                            invoiceFound = true; // Mark as found
+
+                            // Populate details from `invoiceNumbers` if found
+                            if (index !== -1) {
+                                const iNVNO = invoiceNumbers[index];
+                                console.log(`Array containing the invoice:`, iNVNO);
+                                const paidAmount = iNVNO.paidAmount;
+
+
+                                document.getElementById("phoneNumber").value = iNVNO.phoneNumber || "";
+                                document.getElementById("salesMan").value = iNVNO.salesman || "";
+                                document.getElementById("dateField").value = iNVNO.date || "";
+                                const trType = iNVNO.transactionType;
+                                console.log(trType);
+
+                                document.getElementById("transactionType").value =iNVNO.transactionType;
+
+
+
+                                document.getElementById("transactionMode").value = iNVNO.transactionMode || "";
+                                document.getElementById("initialPayment").value = paidAmount || "0";
+                                document.getElementById("initialPayment").addEventListener("input", (e) => {
+                                    window.paidAmount = parseFloat(e.target.value) || 0; // Update `window.paidAmount` dynamically
+                                });
+                                document.getElementById("credtotal").textContent = iNVNO.totalAmount || "";
+                                document.getElementById("balanceAmount").textContent = iNVNO.balanceAmount || "0";
+                                document.getElementById("currentBalance").textContent = iNVNO.oldbalance || "0";
+
+                                // Passing variable to other function
+                                window.paidAmount = paidAmount;
+                                window.invoicebalance = iNVNO.balanceAmount;
+                                window.invoiceTotal = iNVNO.totalAmount;
+
+                                const items = iNVNO.items || []; // Assuming `iNVNO.items` contains the array of items
+
+                                // Populate the table
+                                await populateItemTable(items); // Wait until the table is populated
+                            }
+
+                            // Populate details from `transactionHistory` if found
+                            if (indext !== -1) {
+                                const tRansHist = transactionHistory[indext];
+                                console.log(`Transaction history:`, tRansHist);
+                            }
+                        }
+                    }
+
+                    // If no matching invoice is found after iterating all documents
+                    if (!invoiceFound) {
+                        showAlert(`Invoice number "${invoiceNoToCheck}" not found in any document.`, 2000);
+                    } else {
+                        // Show an alert if all data is fetched
+                        showAlert("All data successfully fetched!", 1000);
+                        let print = document.getElementById("print");
+                        let save = document.getElementById("savefb");
+                        save.style.display = "flex";
+                        print.style.display = "flex";
+                    }
+                } catch (error) {
+                    console.error("Error checking invoice number:", error);
+                }
+
+                // Function to populate the table with data from `items`
+                async function populateItemTable(items) {
+                    const tbody = document.querySelector("#itemTable tbody");
+                    tbody.innerHTML = ""; // Clear existing rows
+
+                    for (const [index, item] of items.entries()) {
+                        const row = document.createElement("tr");
+                        window.row = row;
+
+                        // Fetch the stock asynchronously
+                        const stock = await fetchAvailableStock(item.itemCode);
+                        row.setAttribute("data-previous-qty", item.itemQty || 1); // Store initial quantity as an attribute
+
+                        // Set up the row with fetched stock value
+                        row.innerHTML = `
+                <td>${index + 1}</td>
+                <td>
+                    <input type="number" class="item-code-input" list="item-code-suggestions" 
+                        placeholder="Item Code" value="${item.itemCode || ""}">
+                    <datalist id="item-code-suggestions"></datalist>
+                </td>
+                <td>
+                    <input type="text" class="item-name-input" list="item-name-suggestions" 
+                        placeholder="Item Name" value="${item.itemName || ""}">
+                    <datalist id="item-name-suggestions"></datalist>
+                </td>
+                <td>
+                    <input type="number" class="qty-input" placeholder="Qty" 
+                        value="${item.itemQty || 0}" oninput="calculateAmount(this); validateQty(this);">
+                </td>
+                <td>
+                    <input type="text" class="unit-input" placeholder="Unit" 
+                        value="${item.itemUnit || ""}" readonly>
+                </td>
+                <td>
+                    <input type="number" class="rate-input" placeholder="Rate" 
+                        value="${item.itemRate || 0}" oninput="calculateAmount(this);">
+                </td>
+                <td>
+                    <span class="amount-text">${(item.itemAmount || 0).toFixed(2)}</span>
+                </td>
+                <td>
+                    <span class="mrp">${(item.itemMRP || 0).toFixed(2)}</span>
+                </td>
+                <td>
+                    <span class="wsp">${(item.itemWSP || 0).toFixed(2)}</span>
+                </td>
+                <td>
+                    <span class="stock">${stock || 0}</span>
+                </td>
+                <td>
+                    <span class="delete-btn" onclick="deleteRow(this)">
+                        <img src="./icons/cross.png" width="15px" alt="Delete">
+                    </span>
+                </td>
+            `;
+
+                        tbody.appendChild(row);
+                    }
+                }
+
+                // Async function to fetch available stock
+                async function fetchAvailableStock(itemCode) {
+                    if (!itemCode) {
+                        console.warn("Item code is required to fetch stock.");
+                        return 0;
+                    }
+
+                    try {
+                        const itemDocRef = doc(db, "inventory", itemCode);
+                        const itemDoc = await getDoc(itemDocRef);
+
+                        if (itemDoc.exists()) {
+                            const itemData = itemDoc.data();
+                            return itemData.stock || 0; // Return the stock value
+                        } else {
+                            console.warn(`Item with code "${itemCode}" does not exist.`);
+                            return 0;
+                        }
+                    } catch (error) {
+                        console.error("Error fetching stock:", error);
+                        return 0; // Return 0 in case of error
+                    }
+                }
+            }
+
+            // Call the function with the desired invoice number
+            checkInvoiceNumber(invoiceNo);
+
+            document.addEventListener("DOMContentLoaded", () => {
+                const transactionType = iNVNO.transactionType;
+                console.log("Transaction Type:", transactionType); // Check value
+                document.getElementById("transactionType").value = transactionType;
+            });
+
+
+
+            async function handleQuantityChange(row) {
+                const itemCodeInput = row.querySelector(".item-code-input");
+                const qtyInput = row.querySelector(".qty-input");
+
+                if (!itemCodeInput || !qtyInput) {
+                    console.error("Row structure is incorrect. Missing required inputs.");
+                    console.log("Row content:", row.innerHTML); // Debugging output
+                    return; // Skip this row
+                }
+
+                const itemCode = itemCodeInput.value.trim();
+                const latestQuantity = parseInt(qtyInput.value.trim(), 10) || 0;
+                const previousQuantity = parseInt(row.getAttribute("data-previous-qty")) || 0;
+
+                if (!itemCode || latestQuantity === previousQuantity) {
+                    return; // No item code or no change in quantity
+                }
+
+                try {
+                    // Reference to the inventory document in Firestore
+                    const inventoryRef = doc(db, "inventory", itemCode);
+                    const docSnap = await getDoc(inventoryRef);
+
+                    if (docSnap.exists()) {
+                        const stock = docSnap.data().stock || 0;
+                        const totalStock = stock + previousQuantity;
+
+                        let newStock;
+                        if (latestQuantity > previousQuantity) {
+                            const difference = latestQuantity - previousQuantity;
+                            if (difference > totalStock) {
+                                showAlert("Insufficient stock to complete the transaction.", 3000);
+                                qtyInput.value = previousQuantity; // Revert to previous quantity
+                                return;
+                            }
+                            newStock = totalStock - latestQuantity;
+                        } else {
+                            newStock = totalStock - latestQuantity;
+                        }
+
+                        await updateDoc(inventoryRef, { stock: newStock });
+                        row.setAttribute("data-previous-qty", latestQuantity); // Update previous quantity to the new value
+                        console.log("Stock updated successfully.");
+                    } else {
+                        showAlert("Item code not found in inventory.", 3000);
+                        qtyInput.value = previousQuantity; // Revert to previous quantity
+                    }
+                } catch (error) {
+                    console.error("Error handling quantity change:", error);
+                    showAlert("Error updating stock. Please try again.", 3000);
+                    qtyInput.value = previousQuantity; // Revert to previous quantity
+                }
+            }
+
+
+
+
+            window.fetchSuggestions = async (input, field) => {
+                if (!input || !field) return [];
+
+                try {
+                    const inventoryRef = collection(db, "inventory");
+                    const q = query(inventoryRef, where(field, ">=", input), where(field, "<=", input + "\uf8ff")); // Prefix match query
+                    const querySnapshot = await getDocs(q);
+
+                    const suggestions = [];
+                    querySnapshot.forEach((doc) => {
+                        suggestions.push({ id: doc.id, ...doc.data() });
+                    });
+
+                    return suggestions;
+                } catch (error) {
+                    console.error("Error fetching suggestions:", error);
+                    return [];
+                }
+            };
+
+
+
+
+
+
+
+
+            const validateTable = () => {
+                const table = document.getElementById("itemTable").querySelector("tbody");
+                if (!table || table.rows.length === 0) {
+                    showAlert("Add at least one item.", 2500);
+                    return false;
+                }
+
+                for (const [index, row] of Array.from(table.rows).entries()) {
+                    const itemCodeInput = row.querySelector(".item-code-input");
+                    const itemNameInput = row.querySelector(".item-name-input");
+                    const qtyInput = row.querySelector(".qty-input");
+                    const rateInput = row.querySelector(".rate-input");
+
+                    const itemCode = itemCodeInput ? itemCodeInput.value.trim() : null;
+                    const itemName = itemNameInput ? itemNameInput.value.trim() : null;
+                    const qty = qtyInput ? qtyInput.value.trim() : null;
+                    const rate = rateInput ? rateInput.value.trim() : null;
+
+                    if (!itemCode) {
+                        showAlert(`Item code is missing in row ${index + 1}.`, 2500);
+                        return false;
+                    }
+
+                    if (!itemName) {
+                        showAlert(`Item name is missing in row ${index + 1}.`, 2500);
+                        return false;
+                    }
+
+                    if (!qty || isNaN(qty) || parseInt(qty, 10) <= 0) {
+                        showAlert(`Invalid quantity in row ${index + 1}.`, 2500);
+                        return false;
+                    }
+
+                    if (!rate || isNaN(rate) || parseFloat(rate) <= 0) {
+                        showAlert(`Invalid rate in row ${index + 1}.`, 2500);
+                        return false;
+                    }
+                }
+
+                return true; // If all validations pass
+            };
+
+
+            async function validateAndSaveTransaction(action, invoiceNo) {
+                try {
+                    // Fetch form data
+                    const customerName = document.getElementById("customerNameName").value.trim();
+                    const phoneNumber = document.getElementById("phoneNumber").value.trim();
+                    const date = document.getElementById("dateField").value.trim();
+                    const salesman = document.getElementById("salesMan").value.trim();
+                    const transactionType = document.getElementById("transactionType").value.trim();
+                    const transactionMode = document.getElementById("transactionMode").value.trim();
+                    const initialPayment = parseFloat(document.getElementById("initialPayment").value || "0");
+                    const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
+
+                    // Validations
+                    if (initialPayment === totalAmount && transactionType === "credit") {
+                        showAlert("Transaction type cannot be 'Credit' when the full amount is paid.", 2500);
+                        return;
+                    }
+
+                    const tableIsValid = validateTable();
+                    if (!tableIsValid) return;
+
+                    // Collect updated table data
+                    const updatedItems = [];
+                    const rows = document.querySelectorAll("#itemTable tbody tr");
+                    rows.forEach((row) => {
+                        const itemCode = row.querySelector(".item-code-input").value.trim();
+                        const itemName = row.querySelector(".item-name-input").value.trim();
+                        const itemQty = parseFloat(row.querySelector(".qty-input").value || "0");
+                        const itemUnit = row.querySelector(".unit-input").value.trim();
+                        const itemRate = parseFloat(row.querySelector(".rate-input").value || "0");
+                        const itemAmount = parseFloat(row.querySelector(".amount-text").textContent || "0");
+                        const itemMRP = parseFloat(row.querySelector(".mrp").textContent || "0");
+                        const itemWSP = parseFloat(row.querySelector(".wsp").textContent || "0");
+
+                        if (!itemCode || !itemName || itemQty <= 0 || itemRate <= 0) {
+                            showAlert("Each item must have valid details.", 2500);
+                            throw new Error("Invalid table data.");
+                        }
+
+                        updatedItems.push({
+                            itemCode,
+                            itemName,
+                            itemQty,
+                            itemUnit,
+                            itemRate,
+                            itemAmount,
+                            itemMRP,
+                            itemWSP,
+                        });
+                    });
+
+                    const billsRef = collection(db, "gst");
+                    const querySnapshot = await getDocs(billsRef);
+
+                    let docIdToUpdate = null;
+                    let invoiceNumbers = [];
+                    let transactionHistory = [];
+
+                    querySnapshot.forEach((doc) => {
+                        const data = doc.data();
+
+
+
+
+
+
+                        // Match customer name for total and balance updates
+                        async function calculateTotalBalanceAmount(name) {
+                            try {
+                                const billsCollectionRef = collection(db, "gst");
+                                const billsSnapshot = await getDocs(billsCollectionRef);
+
+                                let totalBalanceAmount = 0;
+                                let fulltotalAmount = 0;
+
+                                billsSnapshot.forEach((doc) => {
+                                    const data = doc.data();
+
+                                    // Check if the customerName matches the provided name
+                                    if (data.customerName === name) {
+                                        const invoiceNumbers = data.invoiceNumbers || []; // Ensure invoiceNumbers exists
+
+                                        invoiceNumbers.forEach((invoice) => {
+                                            totalBalanceAmount += invoice.balanceAmount || 0; // Add balanceAmount, default to 0 if undefined
+                                        });
+
+                                        invoiceNumbers.forEach((invoice) => {
+                                            fulltotalAmount += invoice.totalAmount || 0; // Add totalAmount, default to 0 if undefined
+                                        });
+                                    }
+                                });
+
+                                return { totalBalanceAmount, fulltotalAmount }; // Return both totals as an object
+                            } catch (error) {
+                                console.error("Error calculating total balance amount:", error);
+                            }
+                        }
+
+                        // Use the asynchronous function to fetch and update values
+                        // Replace with the actual customer name
+                        calculateTotalBalanceAmount(customerName)
+                            .then(async ({ totalBalanceAmount, fulltotalAmount }) => {
+                                console.log("Total Balance Amount:", totalBalanceAmount);
+                                console.log("Full Total Amount:", fulltotalAmount);
+
+                                // Find the document for the specified customer
+                                const billsCollectionRef = collection(db, "gst");
+                                const billsSnapshot = await getDocs(billsCollectionRef);
+
+                                billsSnapshot.forEach(async (doc) => {
+                                    const data = doc.data();
+
+                                    if (data.customerName === customerName) {
+                                        try {
+                                            // Update the document with the calculated totals
+                                            await updateDoc(doc.ref, {
+                                                totalAmount: fulltotalAmount,
+                                                balanceAmount: totalBalanceAmount,
+                                            });
+                                            console.log("Totals updated successfully for:", customerName);
+                                        } catch (error) {
+                                            console.error("Error updating totals:", error);
+                                        }
+                                    }
+                                });
+                            })
+                            .catch((error) => {
+                                console.error("Error in calculateTotalBalanceAmount:", error);
+                            });
+                        // Find the document and invoice by `invoiceNo`
+                        const invoiceIndex = (data.invoiceNumbers || []).findIndex((inv) => inv.invoiceNo === invoiceNo);
+                        const historyIndex = (data.transactionHistory || []).findIndex((hist) => hist.invoiceNo === invoiceNo);
+
+                        if (invoiceIndex !== -1 || historyIndex !== -1) {
+                            docIdToUpdate = doc.id;
+                            invoiceNumbers = data.invoiceNumbers || [];
+                            transactionHistory = data.transactionHistory || [];
+                        }
+                    });
+
+                    if (!docIdToUpdate) {
+                        showAlert("Invoice not found for update.", 3000);
+                        return;
+                    }
+
+                    // Update invoiceNumbers
+                    const updatedInvoiceNumbers = invoiceNumbers.map((inv) => {
+                        if (inv.invoiceNo === invoiceNo) {
+                            return {
+                                ...inv,
+                                phoneNumber,
+                                salesman,
+                                date,
+                                transactionType,
+                                transactionMode,
+                                paidAmount: initialPayment,
+                                totalAmount,
+                                balanceAmount: totalAmount - initialPayment,
+                                items: updatedItems,
+                            };
+                        }
+                        return inv;
+                    });
+
+                    // Update transactionHistory
+                    const updatedTransactionHistory = transactionHistory.map((hist) => {
+                        if (hist.invoiceNo === invoiceNo) {
+                            return {
+                                ...hist,
+                                paidAmount: initialPayment,
+                                timestamp: new Date().toLocaleString(),
+                                transactionMode,
+                            };
+                        }
+                        return hist;
+                    });
+
+                    // Save updated data to Firestore
+                    await updateDoc(doc(db, "gst", docIdToUpdate), {
+                        invoiceNumbers: updatedInvoiceNumbers,
+                        transactionHistory: updatedTransactionHistory,
+                    });
+
+                    // Update inventory stock
+                    for (const row of rows) {
+                        await handleQuantityChange(row);
+                    }
+
+                    if (action === "savePrint") {
+                        // Generate and print the PDF
+                        showAlert("Transaction saved and printed successfully!", 2000);
+                        setTimeout(() => {
+                            window.pdfload();
+                        }, 2000);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 4000)
+
+                    } else if (action === "save") {
+                        showAlert("Transaction saved successfully!", 1500);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500)
+                        // 
+                    }
+                } catch (error) {
+                    console.error("Error during validation and save:", error);
+                    showAlert("An error occurred. Please try again.", 3000);
+                }
+            }
+
+
+            function showAlert(message, duration = 3000) {
+                const alertBox = document.getElementById("customAlert");
+                alertBox.textContent = message;
+                alertBox.style.display = "block";
+                setTimeout(() => {
+                    alertBox.style.display = "none";
+                }, duration);
+            }
+
+            // Button event listeners
+            document.getElementById("savefb").addEventListener("click", async () => {
+                try {
+                    const invoiceNo = document.getElementById("invoiceNumber").value.trim(); // Ensure invoice number is provided
+                    if (!invoiceNo) {
+                        showAlert("Invoice number is required!", 3000);
+                        return;
+                    }
+                    await validateAndSaveTransaction("save", invoiceNo);
+                } catch (error) {
+                    console.error("Error during save action:", error);
+                }
+            });
+
+            document.getElementById("print").addEventListener("click", () => { window.pdfload(); });
+
+            // document.getElementById("creditsave").addEventListener("click", async () => {
+            //     try {
+            //         const invoiceNo = document.getElementById("invoiceNumber").value.trim(); // Ensure invoice number is provided
+            //         if (!invoiceNo) {
+            //             showAlert("Invoice number is required!", 3000);
+            //             return;
+            //         }
+            //         await validateAndSaveTransaction("savePrint", invoiceNo);
+            //     } catch (error) {
+            //         console.error("Error during creditsave action:", error);
+            //     }
+            // });
+
+
+
+            // Add keyboard shortcuts
+            document.addEventListener("keydown", (event) => {
+                if (event.ctrlKey && event.key === "s") {
+                    // Ctrl + S for Save
+                    event.preventDefault(); // Prevent the browser's default save dialog
+                    document.getElementById("savefb").click();
+                } else if (event.ctrlKey && event.key === "p") {
+                    // Ctrl + P for Print
+                    event.preventDefault(); // Prevent the browser's default print dialog
+                    document.getElementById("print").click();
+                }
+            });
+
+
+        </script>
+
+
+        <script>
+
+
+
+
+            additem = () => {
+                addRow();
+            }
+
+
+
+            // const addItemButton = document.getElementById('addItemButton');
+            const itemTable = document.getElementById('itemTable').querySelector('tbody');
+            maxrow = 15
+            let rowCount = 0;
+
+            // Enable Add Item button only if the current row is complete
+            // const enableAddButton = () => {
+            //     const rows = itemTable.querySelectorAll('tr');
+            //     const lastRow = rows[rows.length - 1];
+            //     const inputs = lastRow.querySelectorAll('input:not([readonly])');
+            //     const allFilled = Array.from(inputs).every(input => input.value.trim() !== "");
+            //     addItemButton.disabled = !allFilled;
+            // };
+
+            // Add a new row to the table
+            const addRow = () => {
+                rowCount++;
+                const row = document.createElement("tr");
+                window.row = row
+                row.innerHTML = `
+        <td>${rowCount}</td>
+        <td>
+            <input type="number" class="item-code-input" list="item-code-suggestions" placeholder="Item Code">
+            <datalist id="item-code-suggestions"></datalist>
+        </td>
+        <td>
+            <input type="text" class="item-name-input" list="item-name-suggestions" placeholder="Item Name">
+            <datalist id="item-name-suggestions"></datalist>
+        </td>
+        <td><input type="number" class="qty-input" oninput="validateQty(this)" placeholder="Qty"></td>
+        <td><input type="text" class="unit-input" placeholder="Unit" readonly></td>
+        <td><input type="number" class="rate-input" placeholder="Rate"></td>
+        <td><span class="amount-text">0</span></td>
+        <td><span class="mrp">0</span></td>
+        <td><span class="wsp">0</span></td>
+        <td><span class="stock">0</span></td>
+        <td><span class="delete-btn" onclick="deleteRow(this)"><img src="./icons/cross.png" width="15px" alt=""></span></td>
+    `;
+                itemTable.appendChild(row);
+
+                attachAutoCalculationListeners(row);
+
+                // Attach event listeners for item code and item name
+                const itemCodeInput = row.querySelector(".item-code-input");
+                const itemNameInput = row.querySelector(".item-name-input");
+
+                attachEventListenerToInput(itemCodeInput, "itemCode", row);
+                attachEventListenerToInput(itemNameInput, "itemName", row);
+            };
+
+            // Attach event listeners to inputs
+            const attachEventListenerToInput = (inputElement, field, row) => {
+                const dataListId = field === "itemCode" ? "item-code-suggestions" : "item-name-suggestions";
+                const dataList = document.getElementById(dataListId);
+
+                inputElement.addEventListener("input", async () => {
+                    const input = inputElement.value.trim();
+                    dataList.innerHTML = ""; // Clear previous suggestions
+
+                    if (input) {
+                        const suggestions = await window.fetchSuggestions(input, field);
+
+                        suggestions.forEach((item) => {
+                            const option = document.createElement("option");
+                            option.value = field === "itemCode" ? item.id : item.itemName;
+                            dataList.appendChild(option);
+                        });
+                    }
+                });
+
+                inputElement.addEventListener("change", async () => {
+                    const input = inputElement.value.trim();
+                    const suggestions = await window.fetchSuggestions(input, field);
+
+                    if (suggestions.length > 0) {
+                        const item = suggestions[0]; // Use the first matching item
+                        row.querySelector(".item-code-input").value = item.itemCode || "";
+                        row.querySelector(".item-name-input").value = item.itemName || "";
+                        row.querySelector(".unit-input").value = item.unit || "";
+                        row.querySelector(".mrp").textContent = item.mrp || 0;
+                        row.querySelector(".wsp").textContent = item.wsp || 0;
+                        row.querySelector(".stock").textContent = item.stock || 0;
+                        row.dataset.stock = item.stock || 0; // Store stock in the row dataset
+                    } else {
+                        alert("Item not found.");
+                    }
+                });
+            };
+
+            // Validate quantity input
+            const validateQty = (qtyInput) => {
+                const row = qtyInput.closest("tr"); // Get the closest table row
+                const stockElement = row.querySelector(".stock"); // Find the stock element in the row
+                const stock = parseInt(stockElement.textContent, 10) || 0; // Parse stock value
+                const qty = parseInt(qtyInput.value, 10) || 0; // Parse entered quantity
+
+                if (qty > stock) {
+                    alert(`The entered quantity (${qty}) exceeds the available stock (${stock}).`);
+                    qtyInput.value = stock;
+                }
+            };
+
+
+
+
+
+
+
+            // Add a save button handler
+
+
+
+
+
+
+
+
+            const toggleDeleteButtonsVisibility = () => {
+                const deleteButtons = document.querySelectorAll('.delete-btn');
+                const shouldShow = rowCount > 1; // Show only if more than one row
+                deleteButtons.forEach(button => {
+                    button.style.display = shouldShow ? 'inline-block' : 'none';
+                });
+            };
+
+
+
+            // Check if all inputs in the last row are filled and add a new row
+            const checkAndAddRow = () => {
+                const rows = itemTable.querySelectorAll("tr");
+                const lastRow = rows[rows.length - 1];
+                const inputs = lastRow.querySelectorAll("input:not([readonly])");
+                const allFilled = Array.from(inputs).every((input) => input.value.trim() !== "");
+
+                if (allFilled) {
+                    addRow();
+                }
+            };
+            // const deleteRow = (btn) => {
+            //     const row = btn.closest('tr');
+            //     row.remove();
+            //     updateSerialNumbers();
+            //     calculateTotalAmount(); // Recalculate the total after deletion
+            //     // enableAddButton();
+            // };
+
+
+            const deleteRow = (button) => {
+                const row = button.closest('tr');
+                itemTable.removeChild(row);
+                rowCount--;
+                toggleDeleteButtonsVisibility();
+                updateSerialNumbers();
+                calculateTotalAmount();
+            };
+
+
+            // Attach onchange listeners for quantity and rate
+            // Attach onchange listeners for quantity and rate
+            const attachAutoCalculationListeners = (row) => {
+                const qtyInput = row.querySelector(".qty-input");
+                const rateInput = row.querySelector(".rate-input");
+
+                const triggerCalculation = () => calculateAmount(row);
+
+                qtyInput.addEventListener("input", triggerCalculation);
+                rateInput.addEventListener("input", triggerCalculation);
+            };
+
+
+
+            // document.getElementById('initialPayment').addEventListener('input', function (event) {
+            //     const paymentValue = event.target.value;
+
+            //     // Your logic here
+            //     console.log('Initial Payment Changed:', paymentValue);
+
+            //     // Example: Displaying an alert
+            //     if (paymentValue < 0) {
+            //         alert('Payment cannot be negative.');
+            //     } else {
+            //         // Perform actions with the value
+            //     }
+            // });
+
+            // function validateIP() {
+            //     // Get the total and initial payment values
+            //     let total = parseFloat(document.getElementById("credtotal").textContent) || 0;
+            //     let ip = parseFloat(document.getElementById("initialPayment").value) || 0;
+            //     let runningBal=parseFloat(document.getElementById("balanceAmount").textContent) || 0;
+
+            //     // Check if the initial payment exceeds the total
+            //     if (ip > total) {
+            //         document.getElementById("initialPayment").value = total; // Set the value to the total
+            //         document.getElementById("balanceAmount").textContent=total- ip
+
+
+            //     }
+
+            // }
+
+
+
+            // Function to calculate the amount dynamically
+            function calculateAmount(inputElement) {
+                const row = inputElement.closest("tr"); // Get the row
+                const qtyInput = row.querySelector(".qty-input"); // Get the quantity input
+                const rateInput = row.querySelector(".rate-input"); // Get the rate input
+                const amountText = row.querySelector(".amount-text"); // Get the amount element
+
+                const qty = parseFloat(qtyInput.value) || 0; // Parse the quantity value
+                const rate = parseFloat(rateInput.value) || 0; // Parse the rate value
+
+                // Calculate the amount
+                const amount = qty * rate;
+
+                // Update the amount text
+                amountText.textContent = amount.toFixed(2);
+
+                calculateTotalAmount(); // Recalculate the total amount whenever values are updated
+                checkAndAddRow(); // Check if a new row needs to be added
+            }
+
+
+
+
+
+            // Calculate amount (unit price * quantity)
+            // Calculate amount (unit price * quantity)
+            // const calculateAmount = (row) => {
+            //     const unitPrice = parseFloat(row.querySelector(".rate-input").value) || 0;
+            //     const quantity = parseFloat(row.querySelector(".qty-input").value) || 0;
+            //     const amountCell = row.querySelector(".amount-text");
+
+            //     const amount = unitPrice * quantity;
+            //     amountCell.textContent = amount.toFixed(2);
+
+
+            // };
+
+
+
+            const initialPayment = document.getElementById("initialPayment").value;
+            const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
+            const balanceAmount = parseFloat(document.getElementById("balanceAmount").textContent || "0");
+
+            // Calculate total amount
+            // Prevent initialPayment from changing on row add/delete
+            const calculateTotalAmount = () => {
+                const amounts = document.querySelectorAll('.amount-text');
+                let sum = 0;
+                amounts.forEach(cell => {
+                    sum += parseFloat(cell.textContent) || 0;
+                });
+
+                document.getElementById('total').textContent = sum.toFixed(0);
+                document.getElementById('credtotal').textContent = sum.toFixed(0);
+
+                // Call other dependent functions, but do not modify initialPayment
+                FullPaymentCheck();
+                updateBalance(); // Update balance based on existing initialPayment
+            };
+            //FullPayment check logic updated to ensure initialPayment is user-controlled
+            function FullPaymentCheck() {
+                const transactionType = document.getElementById("transactionType").value;
+                const credtotal = parseFloat(document.getElementById("credtotal").textContent || "0");
+                const initialPaymentInput = document.getElementById('initialPayment').value;
+                const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
+                // console.log(credtotal);
+
+
+                if (transactionType === "Full Payment") {
+
+                    document.getElementById("balanceAmount").textContent = "0";
+                    initialPaymentInput.value = totalAmount
+                } else {
+                    initialPaymentInput.value = "0"
+                    updateBalance(); // Only update balance; do not modify initialPayment
+                }
+            }
+
+
+            // document.getElementById("transactionType").addEventListener("click", () => {
+            //     FullPaymentCheck();
+            // });
+
+
+            // Delete a row
+
+            // Update serial numbers after deleting a row
+            const updateSerialNumbers = () => {
+                rowCount = 0;
+                const rows = itemTable.querySelectorAll('tr');
+                rows.forEach(row => {
+                    rowCount++;
+                    row.querySelector('td:first-child').textContent = rowCount;
+                });
+            };
+
+            // Add event listener to the Add Item button
+            // addItemButton.addEventListener('click', addRow);
+
+
+            // Add the initial row on page load
+            window.onload = () => {
+                addRow();
+            };
+
+
+
+
+            // credit selected
+            // const transactionType = document.getElementById('transactionType');
+            const creditFields = document.getElementById('creditFields');
+            const initialPaymentInput = document.getElementById('initialPayment');
+            const balanceAmountSpan = document.getElementById('balanceAmount');
+            document.getElementById('initialPayment').value = 0;
+
+
+            // Total payable amount (Example value, you can replace it dynamically)
+
+
+
+
+            // Show or hide fields based on transaction type
+
+
+
+            // Function to update the balance based on total amount and initial payment
+            // Function to update the balance based on total amount and initial payment
+            const updateBalance = () => {
+                const totalAmount = parseFloat(document.getElementById('credtotal').textContent) || 0;
+                const initialPayment = parseFloat(document.getElementById("initialPayment").value) || 0; // Ensure initialPayment is always parsed
+
+                // Prevent the user from entering a value greater than the total amount
+                if (initialPayment.value > totalAmount) {
+                    initialPaymentInput.value = totalAmount;
+                }
+
+                const balance = totalAmount - initialPayment;
+                console.log(balance);
+
+                document.getElementById("balanceAmount").textContent = balance
+            };
+
+            // Attach the `updateBalance` function to relevant events
+
+
+
+            ////main changing initial payment input bug function
+
+
+            document.getElementById("initialPayment").addEventListener('input', () => {
+
+                const totalAmount = parseFloat(document.getElementById('credtotal').textContent) || 0;
+                const initialPayment = (document.getElementById("initialPayment"));
+
+
+                console.log(initialPayment.value, totalAmount);
+
+
+                // Validate the input value but allow updates even if totalAmount is zero
+                if (initialPayment.value > totalAmount) {
+                    document.getElementById("initialPayment").value = totalAmount;
+
+                }
+                updateBalance();
+                //  // Update the balance after validation
+            });
+
+
+
+
+            // Update balance whenever the total amount is recalculated
+            const originalCalculateTotalAmount = calculateTotalAmount;
+            window.calculateTotalAmount = () => {
+                originalCalculateTotalAmount(); // Call the original function to calculate total
+                updateBalance(); // Update the balance after recalculating the total
+            };
+
+            navigate.addEventListener("click", () => {
+                window.history.back();
+            });
+
+            function home() {
+                window.location.href = "./homePage.html"
+            }
+            function newBill() {
+                window.open('./bill.html', '_blank');
+
+            }
+            function ledger() {
+                window.location.href = "./ledger.html"
+            }
+
+
+
+
+
+
+
+
+
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+        <script
+            src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
+        <script>
+            // validate
+
+            // Retrieve input values
+            async function pdfload() {
+                const { jsPDF } = window.jspdf;
+
+                const customerName = document.getElementById("customerNameName").value.trim();
+                const phoneNumber = document.getElementById("phoneNumber").value.trim();
+                const date = document.getElementById("dateField").value.trim();
+                const invoiceNumber = document.getElementById('invoiceNumber').value;
+                const crrbalance = document.getElementById("currentBalance").textContent
+
+                const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
+                const paidAmount = parseFloat(document.getElementById("initialPayment").value || "0");
+                const balanceAmount = parseFloat(totalAmount) - parseFloat(paidAmount);
+                const updbalance = parseFloat(crrbalance) + balanceAmount;
+
+
+                const table = document.getElementById("itemTable").querySelector("tbody");
+                const items = Array.from(table.rows).map((row) => {
+                    const cells = row.querySelectorAll("td");
+                    return {
+                        no: cells[0].textContent,
+                        code: cells[1].querySelector("input").value,
+                        description: cells[2].querySelector("input").value,
+                        quantity: cells[3].querySelector("input").value + " " + cells[4].querySelector("input").value || "",
+                        price: cells[5].querySelector("input").value,
+                        subtotal: cells[6].textContent,
+                    };
+                });
+
+                const pdf = new jsPDF();
+
+                // Draw border for the whole PDF
+                const pageWidth = pdf.internal.pageSize.width;
+                const pageHeight = pdf.internal.pageSize.height;
+                pdf.setLineWidth(0.1); // Set border thickness
+                pdf.setDrawColor(0, 0, 0); // Set border color (black)
+                pdf.rect(5, 5, pageWidth - 10, pageHeight - 10); // Draw rectangle for border
+
+                // Header section
+                pdf.setFontSize(10);
+                pdf.text("Issued From:", 15, 30);
+                pdf.text("Your Company Name", 15, 35);
+                pdf.text("Your Address Line 1", 15, 40);
+                pdf.text("City, State, ZIP", 15, 45);
+
+                // "Issued To" Section
+                pdf.text("Issued To:", pageWidth - 55, 30);
+                pdf.text(customerName, pageWidth - 55, 35);
+                pdf.text(phoneNumber, pageWidth - 55, 40);
+
+                // "INVOICE" Title
+                pdf.setFontSize(12);
+                pdf.text("INVOICE", 105, 15, { align: "center" });
+
+                // Date and Invoice Number
+                pdf.setFontSize(10);
+                pdf.text(`Date Issued: ${date}`, pageWidth - 55, 55);
+                pdf.text(`Invoice No: ${invoiceNumber}`, 15, 55);
+
+                // Table Header
+                const headers = ["No", "Item Code", "Item", "Qty", "Price", "Subtotal"];
+                const startY = 60;
+
+                pdf.autoTable({
+                    head: [headers],
+                    body: items.map((item) => [
+                        item.no,
+                        item.code,
+                        item.description,
+                        item.quantity,
+                        `${item.price}`,
+                        `${item.subtotal}`,
+                    ]),
+                    startY,
+                    theme: "grid",
+                    styles: {
+                        fontSize: 10,         // Font size for rows
+                        cellPadding: {        // Consistent padding for rows
+                            top: -2,           // Top padding for rows
+                            right: 3,         // Right padding for rows
+                            bottom: -2,        // Bottom padding for rows
+                            left: 3,          // Left padding for rows
+                        },
+                        valign: "middle",     // Ensure vertical alignment for rows
+                        halign: "center",     // Center-align content in rows
+                    },
+                    headStyles: {
+                        fontSize: 11,         // Slightly larger font for headers
+                        cellPadding: {        // Default padding for headers
+                            top: 3,           // Top padding for headers
+                            right: 3,         // Right padding for headers
+                            bottom: 3,        // Bottom padding for headers
+                            left: 3,          // Left padding for headers
+                        },
+                        valign: "middle",     // Ensure vertical alignment for headers
+                        halign: "center",     // Center-align content in headers
+                    },
+                    columnStyles: {
+                        0: { cellWidth: 15, valign: "middle", halign: "center" },
+                        1: { cellWidth: 30, valign: "middle", halign: "center" },
+                        2: { cellWidth: 55, valign: "middle", halign: "center" },
+                        3: { cellWidth: 20, valign: "middle", halign: "center" },
+                        4: { cellWidth: 30, valign: "middle", halign: "center" },
+                        5: { cellWidth: 30, valign: "middle", halign: "center" },
+                    },
+                });
+
+
+                // Summary Section
+                const summaryStartY = pdf.lastAutoTable.finalY + 10;
+                pdf.text(`Grand Total:  ${totalAmount.toFixed(2)}`, pageWidth - 15, summaryStartY, { align: 'right' });
+                pdf.text(`Paid Amount:  ${paidAmount.toFixed(2)}`, pageWidth - 15, summaryStartY + 5, { align: 'right' });
+                pdf.text(`Balance Amount:  ${balanceAmount.toFixed(2)}`, pageWidth - 15, summaryStartY + 10, { align: 'right' });
+
+                pdf.text(`Old Balance: ${crrbalance}`, 15, summaryStartY);
+                pdf.text(`Remaining Balance: ${updbalance}`, 15, summaryStartY + 5);
+
+                // Footer Section
+                const footerY = summaryStartY + 30;
+                pdf.text("(Signature)", 170, footerY + 10);
+                pdf.setFontSize(12);
+                pdf.text("THANK YOU", 105, footerY + 30, { align: "center" });
+
+                // Save PDF
+                pdf.output('dataurlprint');
+                const pdfDataUrl = pdf.output('dataurlstring');
+                const filename = `${customerName}_${invoiceNumber}.pdf`.replace(/\s+/g, '_');
+                const link = document.createElement('a');
+                link.href = pdfDataUrl;
+                link.download = filename;
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+
+
+        </script>
+
+
+</body>
+
+</html>

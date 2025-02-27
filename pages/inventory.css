@@ -101,6 +101,7 @@ body {
 
 .custBody {
     margin: 10px 100px;
+   
 }
 
 .listBox {
@@ -346,5 +347,31 @@ table tbody td input{
   #searchField{
     padding-left: 10px;
   }
-  
- 
+/*   
+  @media (max-width: 431px) {
+    .navbar {
+        height: 150px;
+        column-gap: 5px;
+        padding: 5px 10px;  
+    }
+    .iconDiv {
+        width: 28px;
+        height: 28px;
+    }
+    .searchbox {
+        width: 380px;
+        height: 50px;
+        display: flex;
+        column-gap: 10px;
+    }
+    #heading {
+        font-size: 22px;
+        font-weight: 500;
+    }
+    .custBody {
+        margin: 10px 10px;
+        background-color: red;
+    }
+    
+  }
+  */
