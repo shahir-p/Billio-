@@ -1050,7 +1050,177 @@
 
             // Calculate amount (unit price * quantity)
             // Calculate amount (unit price * quantity)
-            const rows = itemTable.querySelectorAll("tr");
+            const calculateAmount = (row) => {
+                const unitPrice = parseFloat(row.querySelector(".rate-input").value) || 0;
+                const quantity = parseFloat(row.querySelector(".qty-input").value) || 0;
+                const amountCell = row.querySelector(".amount-text");
+                const credtotal = parseFloat(document.getElementById("credtotal").textContent || "0");
+                const initialPaymentInput = document.getElementById('initialPayment').value;
+
+                const amount =parseFloat(unitPrice * quantity);
+                amountCell.textContent = amount.toFixed(2);
+
+                calculateTotalAmount(); // Recalculate the total amount whenever values are updated
+                checkAndAddRow(); // Check if a new row needs to be added
+                FullPaymentCheck();
+                gstCalaculate(row);
+                calculateTotalAmount();
+                calculateSubTotalAmount();
+                calculateTotalGST();
+
+            };
+
+
+
+            const gstCalaculate = (row) => {
+
+                // Get input values and ensure they are numbers
+                const amountCell = parseFloat(row.querySelector(".amount-text").textContent) || 0;
+                const gstrate = parseFloat(row.querySelector(".gstRate").value) || 0;
+
+                // Get target elements for SGST, CGST, and Total
+                const sgst = row.querySelector(".sgst");
+                const cgst = row.querySelector(".cgst");
+                const totalCol = row.querySelector(".total");
+
+                // Calculate GST amount
+                const gstamount = parseFloat(((amountCell * gstrate) / 100).toFixed(2));
+
+
+
+
+
+
+                // Calculate SGST and CGST as half of GST amount
+                sgst.textContent = parseFloat((gstamount / 2).toFixed(2));
+                cgst.textContent = parseFloat((gstamount / 2).toFixed(2));
+
+                // Ensure GST amount is a number for total calculation
+                const total = parseFloat(amountCell + gstamount).toFixed(2);
+                totalCol.textContent = total;
+
+                // Debug logs
+                // console.log("Type of amountCell:", typeof amountCell);
+                // console.log("Type of gstamount:", typeof gstamount);
+                // console.log("GST Amount:", gstamount);
+                calculateTotalGST();
+
+
+            }
+            const calculateTotalGST = () => {
+                let totalSGST = 0;
+                let totalCGST = 0;
+
+                // Get all rows of the table
+                const rows = itemTable.querySelectorAll("tr");
+
+                rows.forEach((row) => {
+                    // Get SGST and CGST values from the row
+                    const sgstValue = parseFloat(row.querySelector(".sgst").textContent) || 0;
+                    // console.log("sgst value :",sgstValue);
+                    
+                    const cgstValue = parseFloat(row.querySelector(".cgst").textContent) || 0;
+
+                    // Accumulate SGST and CGST
+                    totalSGST += sgstValue;
+                    totalCGST += cgstValue;
+                });
+
+                // Calculate total GST (sum of SGST and CGST)
+                const totalGST = totalSGST + totalCGST;
+
+                // Update the total GST in the DOM
+                document.getElementById('taxamount').textContent = totalGST.toFixed(2);
+
+                // Debug logs
+                // console.log("Total SGST:", totalSGST);
+                // console.log("Total CGST:", totalCGST);
+                // console.log("Total GST:", totalGST);
+            };
+
+
+
+            // Add input listener to all elements with the class 'gstRate'
+            document.addEventListener('input', (event) => {
+                if (event.target.classList.contains('gstRate')) {
+                    const row = event.target.closest('tr'); // Get the table row containing the .gstRate input
+                    gstCalaculate(row);
+                    calculateTotalAmount();
+                    calculateSubTotalAmount();
+                   
+
+                }
+            });
+
+
+
+
+            const initialPayment = document.getElementById("initialPayment").value;
+            const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
+            const balanceAmount = parseFloat(document.getElementById("balanceAmount").textContent);
+
+
+
+
+            const calculateTotalAmount = () => {
+                // Select all elements with the 'total' class
+                const totals = document.querySelectorAll('.total');
+
+                // Initialize the sum
+                let sum = 0;
+
+                // Iterate through the totals and add their values to the sum
+                totals.forEach(totalCell => {
+                    const value = parseFloat(totalCell.textContent) || 0; // Convert to number, default to 0 if invalid
+                    sum += value; // Add to the total sum
+                });
+
+                // Log the total sum
+                console.log("Total Sum:", sum);
+                document.getElementById('credtotal').textContent = sum.toFixed(0)
+                FullPaymentCheck();
+                // updateBalance();
+            };
+            const calculateSubTotalAmount = () => {
+                // Select all elements with the 'total' class
+                const amounts = document.querySelectorAll('.amount-text');
+
+                // Initialize the sum
+                let sum = 0;
+
+                // Iterate through the totals and add their values to the sum
+                amounts.forEach(Cell => {
+                    const value = parseFloat(Cell.textContent) || 0; // Convert to number, default to 0 if invalid
+                    sum += value; // Add to the total sum
+                });
+
+                // Log the total sum
+                console.log("Total Sum:", sum);
+                document.getElementById('taxableamount').textContent = sum.toFixed(2)
+
+                // updateBalance();
+            };
+
+
+
+
+
+            const updateBalance = () => {
+                const totalAmount = parseFloat(document.getElementById('credtotal').textContent) || 0
+                console.log("total", totalAmount);
+
+                const initialPayment = parseFloat(document.getElementById('initialPayment').value) || 0
+                console.log("ip", initialPayment);
+                const balance = totalAmount - initialPayment;
+                console.log("balance", balance);
+                document.getElementById('balanceAmount').textContent = balance.toFixed(2);
+
+            };
+
+            function FullPaymentCheck() {
+
+
+
                 const transactionType = document.getElementById("transactionType").value;
                 const credtotal = parseFloat(document.getElementById("credtotal").textContent || "0");
                 const initialPayment = document.getElementById('initialPayment').value || 0;
