@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="shortcut icon" href="./icons/ledger.png" type="image/x-icon">
-    <title>Ledger</title>
+    <link rel="shortcut icon" href="./icons/customer nav.png" type="image/x-icon">
+    <title>Customers</title>
     <!-- Firebase App (Core SDK) -->
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js" type="module"></script>
     <!-- Firebase Firestore SDK -->
@@ -44,6 +44,45 @@
             width: 100%;
             height: 100%;
             background-position: center;
+        }
+
+        .searchbox {
+            margin-right: 35px;
+            width: 380px;
+
+            height: 50px;
+            display: flex;
+            column-gap: 10px;
+
+
+
+
+        }
+
+        #filter {
+            height: 100%;
+            border-radius: 10px;
+            padding-left: 8px;
+            margin-right: 10px;
+        }
+
+        #searchField {
+            height: 100%;
+            /* width: 100%; */
+            border-radius: 10px;
+            border: 1px solid;
+            padding-left: 10px;
+        }
+
+        .navIcons {
+            display: flex;
+            column-gap: 20px;
+
+        }
+
+        #heading {
+            font-size: 25px;
+            font-weight: 500;
         }
 
         .custBody {
@@ -123,34 +162,6 @@
 
         }
 
-        .searchbox {
-            margin-right: 150px;
-            width: 280px;
-
-            height: 50px;
-
-
-
-        }
-
-        #searchField {
-            height: 100%;
-            width: 100%;
-            border-radius: 10px;
-            border: 1px solid;
-            padding-left: 8px;
-        }
-
-        .navIcons {
-            display: flex;
-            column-gap: 20px;
-
-        }
-
-        #heading {
-            font-size: 25px;
-            font-weight: 500;
-        }
 
 
         @media (max-width: 980px) {
@@ -215,7 +226,7 @@
     <nav class="navbar">
         <div class="navIcons">
             <div class="iconDiv"><img src="./icons/home.png" title="home" onclick="home()"></div>
-            <div class="iconDiv"><img src="./icons/new bill.png" title="new bill" onclick="newBill()"></div>
+            <div class="iconDiv"><img src="./icons/gst logo.png" title="new bill" onclick="newBill()"></div>
             <div class="iconDiv"><img src="./icons/ledger.png" title="ledger" onclick="ledger()"></div>
             <div class="iconDiv"><img src="./icons/customer nav.png" title="customers" onclick="customers()"></div>
             <div class="iconDiv"><img src="./icons/inventory-management.png" title="store" onclick="inventory()"></div>
@@ -224,24 +235,28 @@
             <div class="iconDiv"><img src="./icons/bell.png" title="Notification" onclick="notification()"></div>
             <div class="iconDiv"><img src="./icons/info.png" title="info" onclick="info()"></div>
             <div class="iconDiv"><img src="./icons/logout.png" title="logout" onclick=""></div>
+
         </div>
         <div class="searchbox ">
-            <input type="text" placeholder="&#128270; Name or INV NO :" id="searchField">
-
-
+            <div class="filterBox">
+                <select id="filter" class="  inputTrans" required>
+                    <option value="all">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="cleared">Cleared</option>
+            </div>
+            <input type="text" placeholder="&#128270;Enter Customer Name " id="searchField">
         </div>
+
     </nav>
     <div class="custBody ">
-        <span id="heading">Sales</span>
-        <div class="listBox">
-            <div style="width: 10%; text-align: center;">S/N</div>
-            <div style="width: 15%; text-align: center;">Date</div>
-            <div style="width: 30%; text-align: center;">Name</div>
-            <div style="width: 15%; text-align: center;">Invoice</div>
-            <div style="width: 15%; text-align: center;">Amount</div>
-            <div style=" width: 15%; text-align: center;">
 
-            </div>
+        <div class="listBox">
+            <div style="width: 10%;">S/N</div>
+            <div style="width: 30%;">Name</div>
+            <div style="width: 15%;">Total</div>
+            <div style="width: 15%;">Balance</div>
+            <div style="width: 10%;"><img src="" alt=""> Status</div>
+
         </div>
         <div class="genListContainer" id="customer-list">
             <!-- generated list display here -->
@@ -291,17 +306,19 @@
                 listItem.classList.add("customer-item");
 
                 listItem.innerHTML = `
-            <div style="width: 10%;">${serialNumber++}</div>
-            <div style="width: 15%;">${data.date}</div>
-            <div style="width: 30%;">${data.customerName}</div>
-            <div style="width: 15%;">${data.invoiceNo}</div>
-            <div style="width: 15%;">${data.amount}</div>
-            <div style="width: 15%;">
-                <button class="btn btn-primary btn-sm view-button" data-invoice="${data.invoiceNo}" data-customer="${data.customerName}">
-                    View
-                </button>
-            </div>
-        `;
+                    <div style="width: 10%; ">${serialNumber++}</div>
+                    <div style="width: 30%; ">${data.customerName}</div>
+                    <div style="width:15%;  ">${data.totalAmount}</div>
+                    <div style="width: 15%;  ">${data.balanceAmount || 0}</div>
+                    <div style="width: 10%;">
+                        <img src="./icons/${data.balanceAmount === 0 ? "paid" : "pending"}.png" alt="">
+                    </div>
+                `;
+
+                // Add event listener to redirect to the details page
+                listItem.addEventListener("click", () => {
+                    window.location.href = `gstcustomerDetails.html?customerName=${data.customerName}`;
+                });
 
                 customerList.appendChild(listItem);
             });
@@ -309,100 +326,80 @@
             if (customers.length === 0) {
                 customerList.innerHTML = "No results found!";
             }
-
-            // Add event listeners for all view buttons
-            document.querySelectorAll('.view-button').forEach(button => {
-                button.addEventListener('click', (event) => {
-                    const invoiceNo = button.getAttribute('data-invoice');
-                    const customerName = button.getAttribute('data-customer');
-
-                    // Construct the URL with query parameters
-                    const url = `invoiceDetails.html?invoiceNo=${encodeURIComponent(invoiceNo)}&customerName=${encodeURIComponent(customerName)}`;
-
-                    // Redirect to the target page
-                    window.location.href = url;
-                });
-            });
-
         }
 
+        // Function to fetch all customers in real-time
+        // Function to fetch all customers and sort by the latest transaction timestamp
+        // Fetch all customers in real-time with filtering
         function fetchAllCustomersRealTime() {
             if (unsubscribe) {
                 unsubscribe(); // Unsubscribe from previous listeners
             }
 
-            const customersRef = collection(db, "bills");
+            const filter = document.getElementById("filter").value; // Get selected filter value
+            const customersRef = collection(db, "gst");
+            let customerQuery = customersRef;
 
-            unsubscribe = onSnapshot(customersRef, (snapshot) => {
-                const customersInvoices = [];
+            // Apply filtering based on balanceAmount
+            if (filter === "pending") {
+                customerQuery = query(customersRef, where("balanceAmount", ">", 0));
+            } else if (filter === "cleared") {
+                customerQuery = query(customersRef, where("balanceAmount", "==", 0));
+            }
 
-                snapshot.docs.forEach((doc) => {
-                    const data = doc.data();
-                    const customerName = data.customerName || "Unknown Customer";
-                    const invoiceNumbers = data.invoiceNumbers || [];
+            unsubscribe = onSnapshot(customerQuery, (snapshot) => {
+                const customers = snapshot.docs
+                    .map((doc) => {
+                        const data = doc.data();
 
-                    invoiceNumbers.forEach((invoice) => {
-                        customersInvoices.push({
-                            customerName,
-                            date: invoice.date,
-                            invoiceNo: invoice.invoiceNo,
-                            amount: invoice.totalAmount,
-                        });
+                        // Extract the latest transaction based on the timestamp field
+                        const latestTransaction = data.transactionHistory
+                            ? data.transactionHistory.reduce((latest, transaction) => {
+                                const currentDate = new Date(transaction.timestamp);
+                                const latestDate = new Date(latest.timestamp);
+                                return currentDate > latestDate ? transaction : latest;
+                            })
+                            : null;
+
+                        return {
+                            ...data,
+                            latestTransactionTimestamp: latestTransaction
+                                ? latestTransaction.timestamp
+                                : null,
+                        };
                     });
+
+                // Sort customers by the most recent transaction timestamp
+                customers.sort((a, b) => {
+                    return new Date(b.latestTransactionTimestamp) - new Date(a.latestTransactionTimestamp);
                 });
 
-                // Sort invoices by numeric part of invoiceNo in descending order
-                customersInvoices.sort((a, b) => {
-                    const numA = parseInt(a.invoiceNo.match(/\d+$/) || 0); // Extract numeric part
-                    const numB = parseInt(b.invoiceNo.match(/\d+$/) || 0); // Extract numeric part
-                    return numB - numA; // Sort numerically in descending order
-                });
-
-                // Render the fetched data in HTML
-                renderCustomerList(customersInvoices);
+                renderCustomerList(customers);
             });
         }
 
+        // Attach event listener to the filter dropdown
+        document.getElementById("filter").addEventListener("change", fetchAllCustomersRealTime);
 
-        async function searchCustomersByNameOrInvoice(searchValue) {
+
+        // Function to fetch customers by name
+        async function searchCustomersByName(name) {
             try {
                 if (unsubscribe) {
                     unsubscribe(); // Stop real-time updates during search
                     unsubscribe = null;
                 }
 
-                const customersRef = collection(db, "bills");
-                const customersInvoices = [];
+                const customersRef = collection(db, "gst");
+                const nameQuery = query(
+                    customersRef,
+                    where("customerName", ">=", name),
+                    where("customerName", "<=", name + "\uf8ff")
+                );
 
-                // Fetch all documents and filter in memory for both customerName and invoiceNo
-                const snapshot = await getDocs(customersRef);
-
-                snapshot.docs.forEach((doc) => {
-                    const data = doc.data();
-                    const customerName = data.customerName || "Unknown Customer";
-                    const invoiceNumbers = data.invoiceNumbers || [];
-
-                    invoiceNumbers.forEach((invoice) => {
-                        if (
-                            customerName.toLowerCase().includes(searchValue.toLowerCase()) || // Match customer name
-                            invoice.invoiceNo.toLowerCase().includes(searchValue.toLowerCase()) // Match invoice number
-                        ) {
-                            customersInvoices.push({
-                                customerName,
-                                date: invoice.date,
-                                invoiceNo: invoice.invoiceNo,
-                                amount: invoice.totalAmount,
-                            });
-                        }
-                    });
-                });
-
-                // Sort invoices by invoiceNo in descending order
-                customersInvoices.sort((a, b) => {
-                    return b.invoiceNo.localeCompare(a.invoiceNo); // Sorting by invoiceNo
-                });
-
-                renderCustomerList(customersInvoices);
+                const snapshot = await getDocs(nameQuery); // One-time fetch
+                const customers = snapshot.docs.map((doc) => doc.data());
+                renderCustomerList(customers);
             } catch (error) {
                 console.error("Error searching customers: ", error);
             }
@@ -413,14 +410,17 @@
             const searchValue = searchField.value.trim();
 
             if (searchValue) {
-                searchCustomersByNameOrInvoice(searchValue); // Search by name or invoice
+                searchCustomersByName(searchValue);
             } else {
                 fetchAllCustomersRealTime(); // Revert to real-time updates when search is cleared
             }
         });
+
+
+
+
         // Fetch all customers on page load
         fetchAllCustomersRealTime();
-
 
 
     </script>
@@ -430,16 +430,16 @@
             window.open('./homePage.html', '_blank');
         }
         function newBill() {
-            window.open('./bill.html', '_blank');
+            window.open('./gstbill.html', '_blank');
 
         }
         function ledger() {
 
-            window.open('./ledger.html', '_blank');
+            window.open('./gstledger.html', '_blank');
         }
         function customers() {
 
-            window.open('./customers.html', '_blank');
+            window.open('./gstcustomers.html', '_blank');
         }
         function inventory() {
 
@@ -455,13 +455,12 @@
         }
         function notification() {
 
-            window.open('./notification.html', '_blank');
+            window.open('./gstnotification.html', '_blank');
         }
         function info() {
 
             window.open('./info.html', '_blank');
         }
-
 
 
     </script>

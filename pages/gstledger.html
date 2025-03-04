@@ -215,13 +215,14 @@
     <nav class="navbar">
         <div class="navIcons">
             <div class="iconDiv"><img src="./icons/home.png" title="home" onclick="home()"></div>
-            <div class="iconDiv"><img src="./icons/new bill.png" title="new bill" onclick="newBill()"></div>
+            <div class="iconDiv"><img src="./icons/gst logo.png" title="new bill" onclick="newBill()"></div>
             <div class="iconDiv"><img src="./icons/ledger.png" title="ledger" onclick="ledger()"></div>
             <div class="iconDiv"><img src="./icons/customer nav.png" title="customers" onclick="customers()"></div>
             <div class="iconDiv"><img src="./icons/inventory-management.png" title="store" onclick="inventory()"></div>
-            <div class="iconDiv"><img src="./icons/debt.png" title="debit" onclick=""></div>
-            <div class="iconDiv"><img src="./icons/overview nav.png" title="overviw" onclick=""></div>
-            <div class="iconDiv"><img src="./icons/info.png" title="info" onclick=""></div>
+            <div class="iconDiv"><img src="./icons/debt.png" title="debit" onclick="debit()"></div>
+            <div class="iconDiv"><img src="./icons/overview nav.png" title="overviw" onclick="overview()"></div>
+            <div class="iconDiv"><img src="./icons/bell.png" title="Notification" onclick="notification()"></div>
+            <div class="iconDiv"><img src="./icons/info.png" title="info" onclick="info()"></div>
             <div class="iconDiv"><img src="./icons/logout.png" title="logout" onclick=""></div>
         </div>
         <div class="searchbox ">
@@ -231,7 +232,7 @@
         </div>
     </nav>
     <div class="custBody ">
-        <span id="heading">Sales</span>
+        <span id="heading">GST-Sales</span>
         <div class="listBox">
             <div style="width: 10%; text-align: center;">S/N</div>
             <div style="width: 15%; text-align: center;">Date</div>
@@ -424,22 +425,45 @@
 
     </script>
     <script>
+
         function home() {
-            window.location.href = "./homePage.html"
+
+            window.open('./homePage.html', '_blank');
         }
         function newBill() {
-            window.open('./bill.html', '_blank');
+            window.open('./gstbill.html', '_blank');
 
         }
         function ledger() {
-            window.location.href = "./ledger.html"
+
+            window.open('./gstledger.html', '_blank');
         }
         function customers() {
-            window.location.href = "./customers.html"
+
+            window.open('./gstcustomers.html', '_blank');
         }
         function inventory() {
-            window.location.href = "./inventory.html"
+
+            window.open('./inventory.html', '_blank');
         }
+        function debit() {
+
+            window.open('./debit.html', '_blank');
+        }
+        function overview() {
+
+            window.open('./overview.html', '_blank');
+        }
+        function notification() {
+
+            window.open('./gstnotification.html', '_blank');
+        }
+        function info() {
+
+            window.open('./info.html', '_blank');
+        }
+
+
 
     </script>
 

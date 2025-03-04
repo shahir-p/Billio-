@@ -4,369 +4,527 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js" type="module"></script>
-    <!-- Firebase Firestore SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js" type="module"></script>
-    <title>debit</title>
+    <link rel="shortcut icon" href="./icons/debt.png" type="image/x-icon">
+    <title>Debit</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-
-        body {
-            font-family: "Poppins", serif;
-        }
-
-        .debitbody {
-            margin: 10px 100px;
-        }
-
-        .listBox {
-            height: 60px;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 0 10px;
-            font-weight: 600;
-            font-size: 22px;
-        }
-
-        /* .listItem {
-            background-color: lightblue;
-        } */
-
-        .genListContainer {
-
-
-            width: 100%;
-        }
-
-        .seller-item {
-            height: 60px;
-            width: 100%;
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            padding: 0 10px;
-            margin-top: 10px;
-            font-size: 18px;
-            font-weight: 500;
-            /* background-color: beige; */
-        }
-
-        .seller-list {
-            display: flex;
-            font-size: 20px;
-            font-weight: 800;
-        }
-
-
-
-        /* .listBox div {
-            font-weight: 600;
-        } */
-
-        .listBox div,
-        .seller-item div {
-            text-align: center;
-
-        }
-
-        .listBox img,
-        .seller-item img {
-            width: 40px;
-        }
-
-        .row {
-            /* width: 100%; */
-            margin-top: 20px;
-            margin-bottom: 50px;
-            /* background-color: red; */
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-
-
-        }
-
-        .searchbox {
-
-            width: 500px;
-            height: 60px;
-            display: flex;
-            border: 1px solid rgb(204, 203, 203);
-        }
-
-        #searchField {
-            width: 500px;
-        }
-
-        .addButton {
-            /* border:2px solid green; */
-            width: max-content;
-            padding: 10px;
-            border-radius: 15px;
-            margin-bottom: 15px;
-            font-size: 20px;
-            color: white;
-            background-color: green;
-            cursor: pointer;
-
-        }
-
-        .popup-form {
-            display: none;
-            /* Initially hidden */
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: #fff;
-            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
-            border-radius: 10px;
-            padding: 20px;
-            z-index: 1000;
-            width: 300px;
-        }
-
-        .popup-form h3 {
-            margin-bottom: 20px;
-        }
-
-        .popup-form .form-label {
-            font-weight: bold;
-        }
-
-        .popup-form .btn {
-            margin-right: 10px;
-        }
-
-        body.popup-active {
-            overflow: hidden;
-            /* Prevent scrolling when popup is active */
-        }
-
-        @media (max-width: 980px) {
-            .backname {
-                margin-bottom: 20px;
-            }
-
-            .searchbox {
-                margin-left: 20px;
-            }
-        }
-
-        @media (max-width: 700px) {
-            .backname {
-                margin-bottom: 20px;
-            }
-
-            .custBody {
-                margin: 10px 20px;
-            }
-
-            .row {
-                margin-bottom: 20px;
-            }
-
-            .searchbox {
-
-                width: 300px;
-                height: 60px;
-                display: flex;
-                border: 1px solid rgb(204, 203, 203);
-                margin-top: 10 px;
-                margin-left: 20px;
-            }
-
-            .listBox {
-                font-weight: 500;
-                font-size: 18px;
-            }
-
-        }
-
-
-        @media (max-width: 475px) {
-            .listBox {
-
-                font-weight: 500;
-                font-size: 16px;
-            }
-
-            .seller-item {
-
-                font-size: 15px;
-                font-weight: 400;
-                /* background-color: beige; */
-            }
-        }
-    </style>
+    <link rel="stylesheet" href="./debit.css">
 </head>
 
 <body>
-    <div class="debitbody">
-        <div class="row">
-            <div class="d-flex align-items-center backname" style="width: 300px;">
-                <img width="30px" height="30px" src="./icons/back.png" alt="" id="navigate">
-                <h2 class="ms-4">Debit</h2>
+    <nav class="navbar">
+        <div class="navIcons">
+            <div class="iconDiv"><img src="./icons/home.png" title="home" onclick="home()"></div>
+            <div class="iconDiv"><img src="./icons/inventory-management.png" title="store" onclick="inventory()"></div>
+            <div class="iconDiv"><img src="./icons/debt.png" title="debit" onclick="debit()"></div>
+            <div class="iconDiv"><img src="./icons/overview nav.png" title="overviw" onclick="overview()"></div>
+            <div class="iconDiv"><img src="./icons/bell.png" title="Notification" onclick="notification()"></div>
+            <div class="iconDiv"><img src="./icons/info.png" title="info" onclick="info()"></div>
+            <div class="iconDiv"><img src="./icons/logout.png" title="logout" onclick=""></div>
+
+        </div>
+        <div class="searchbox ">
+            <div class="filterBox d-flex align-items-center">
+
+                <div id="debitshow">
+                    <span>Debit = <span id="totalDept">00000</span></span>
+                    <input type="date" name="" id="totalDate">
+                </div>
+                <input type="text" placeholder="&#128270;Search Item" id="searchField">
             </div>
 
-            <div class="searchbox  p-2 rounded   ">
-                <input type="text" placeholder="Enter seller Name" id="searchField">
-                <button class="ms-1 bg-success text-white" style="width: 100px;" id="searchButton">search</button>
 
 
+    </nav>
+    <div class="homeContainer">
+
+        <div id="customAlertContainer"></div>
+
+
+
+        <div id="customAlert" style="
+    display: none; 
+    position: fixed; 
+    top: 20px; 
+    left: 50%; 
+    transform: translateX(-50%);
+    background-color: #3978de; 
+    color: white; 
+    padding: 10px 20px; 
+    border-radius: 5px; 
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); 
+    font-size: 14px; 
+    z-index: 1000;">
+        </div>
+        <!-- Fixed billRow -->
+
+        <div class="homeBody">
+            <!-- Form to add a new product -->
+            <div class="topRow">
+                <div class="headRow">
+                    <span id="heading">Debit</span>
+                    <div class="addButton" id="addButton">Add +</div>
+
+
+
+                </div>
+                <div class="saveButton" id="saveButton">Save</div>
+                <div class="toggle-container">
+                    <span id="status">Read Mode</span>
+                    <label class="toggle-switch">
+                        <input type="checkbox" id="toggle-button">
+                        <span class="slider"></span>
+                    </label>
+
+                </div>
             </div>
-
+            <div class="tableContainer">
+                <table class="table table-bordered" id="itemTable">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">S/N</th>
+                            <th style="width: 7%;">Date</th>
+                            <th style="width: 8%;">Time</th>
+                            <th style="width: 25%;">Name</th>
+                            <th style="width: 10%;">Discription</th>
+                            <th style="width: 10%;">Amount</th>
+                            <th style="width: 5%;">Action</th>
+                        </tr>
+                    <tbody>
+                        <!-- Rows will be dynamically added here -->
+                    </tbody>
+                </table>
+            </div>
         </div>
-        <div class="addButton" id="purchaseButton">Purchase <img src="./icons/add.png" alt="" width="25px"></div>
-
-    
-        <div class="listBox">
-            <div style="width: 60px;">S/N</div>
-            <div style="width: 150px;">Name</div>
-            <div style="width: 100px;">Total</div>
-            <div style="width: 100px;">Balance</div>
-            <div><img src="" alt="">Status</div>
 
 
+        <!-- Confirmation Modal -->
+        <div class="modal fade" id="confirmDeleteModal" tabindex="-1" aria-labelledby="confirmDeleteModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="confirmDeleteModalLabel">Confirm Deletion</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete item "<span id="confirmItem"></span>"?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" data-bs-dismiss="modal"
+                            id="confirmDeleteButon">Delete</button>
+
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="genListContainer " id="seller-list">
-            <!-- generated list display here -->
+
+        <!-- Success Modal -->
+        <div class="modal fade" id="successModal" tabindex="-1" aria-labelledby="successModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="successModalLabel">Success</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body text-center">
+                        Item "<span id="successItem"></span>" deleted successfully.
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteConfirmationModal" tabindex="-1" aria-labelledby="deleteConfirmationLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="deleteConfirmationLabel">Delete Confirmation</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        Are you sure you want to delete this record?
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmDelete">Delete</button>
+                    </div>
+                </div>
+            </div>
         </div>
 
-    </div>
+
+
+
 </body>
 <script>
-     purchaseButton.addEventListener("click", () => {
-       window.location.href = './debitbill.html'
+    const addButton = document.querySelector('.addButton');
+    const tableBodyy = document.querySelector('#itemTable tbody');
+    const saveButton = document.getElementById('saveButton');
+    const toggleButton = document.getElementById('toggle-button');
+    const statusText = document.getElementById('status');
+    let newRowAdded = false; // Flag to track if a new row has been added
+    const deleteButtons = tableBodyy.querySelectorAll(".delete-row");
+
+    // Hide the save button initially
+    saveButton.style.display = "none";
+    deleteButtons.forEach(button => {
+        button.style.display = "none"; // Hide delete buttons
     });
-    
-    navigate.addEventListener("click", () => {
-        window.location.href = './homePage.html';  // This will navigate to the homepage
+
+
+    addButton.addEventListener('click', () => {
+        saveButton.style.display = "flex";
+    })
+    // Add event listener to the toggle button for edit/read mode
+    toggleButton.addEventListener('change', () => {
+        const deleteButtons = tableBodyy.querySelectorAll(".delete-row");
+
+        if (toggleButton.checked) {
+            statusText.textContent = 'Edit Mode';
+
+            // Show all delete buttons in Edit Mode
+            deleteButtons.forEach(button => {
+                button.style.display = "flex"; // Make delete buttons visible
+            });
+
+            saveButton.style.display = "flex"; // Show save button in Edit Mode
+        } else {
+            statusText.textContent = 'Read Mode';
+
+            // Hide all delete buttons in Read Mode
+            deleteButtons.forEach(button => {
+                button.style.display = "none"; // Hide delete buttons
+            });
+
+            saveButton.style.display = "none"; // Hide save button in Read Mode
+        }
     });
-    
+
+
+
+
+
+
+    // Navigation functions
+    function home() {
+
+        window.open('./homePage.html', '_blank');
+    }
+    function newBill() {
+        window.open('./bill.html', '_blank');
+
+    }
+    function ledger() {
+
+        window.open('./ledger.html', '_blank');
+    }
+    function customers() {
+
+        window.open('./customers.html', '_blank');
+    }
+    function inventory() {
+
+        window.open('./inventory.html', '_blank');
+    }
+    function debit() {
+
+        window.open('./debit.html', '_blank');
+    }
+    function overview() {
+
+        window.open('./overview.html', '_blank');
+    }
+    function notification() {
+
+        window.open('./notification.html', '_blank');
+    }
+    function info() {
+
+        window.open('./info.html', '_blank');
+    }
+
 
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+    crossorigin="anonymous"></script>
+
+
+
+
 <script type="module">
-    // Import Firebase and Firestore modular APIs
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-app.js";
-    import { getFirestore, collection, onSnapshot, query, where, getDocs } from "https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js";
-  
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-app.js";
+    import {
+        getFirestore,
+        collection,
+        addDoc,
+        getDocs,
+        updateDoc,
+        deleteDoc,
+        setDoc,
+        doc,
+        query, where, onSnapshot
+    } from "https://www.gstatic.com/firebasejs/9.21.0/firebase-firestore.js";
+
     // Firebase configuration
     const firebaseConfig = {
-      apiKey: "AIzaSyBZ_mkqt1dB2_uLRGamOxxjcOjgxntL8gY",
-      authDomain: "mill-karathur-6756d.firebaseapp.com",
-      projectId: "mill-karathur-6756d",
-      storageBucket: "mill-karathur-6756d.appspot.com",
-      messagingSenderId: "304225841532",
-      appId: "1:304225841532:web:c09b203608227e991bb4f9",
-      measurementId: "G-VRXZKDPYPX",
+        apiKey: "AIzaSyB5Dll51Ier9CDbYfS5D_VBuZCVZdz2wS0",
+        authDomain: "full-bill.firebaseapp.com",
+        projectId: "full-bill",
+        storageBucket: "full-bill.firebasestorage.app",
+        messagingSenderId: "866610694066",
+        appId: "1:866610694066:web:af68a003b7fa00fe7c86ab"
     };
-  
-    // Initialize Firebase and Firestore
+
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-  
-    // Get DOM elements
-    const sellerList = document.getElementById("seller-list");
-    const searchField = document.getElementById("searchField");
-    const purchaseButton = document.getElementById("purchaseButton");
-    const navigate = document.getElementById("navigate");
-  
-    // Add click event listeners
-    purchaseButton.addEventListener("click", () => {
-      window.location.href = './debitbill.html';
-    });
-  
-    navigate.addEventListener("click", () => {
-      window.location.href = './homePage.html';
-    });
-  
-    let unsubscribe = null; // To manage real-time listeners
-  
-    // Function to render seller data
-    function renderSellerList(sellers) {
-      sellerList.innerHTML = ""; // Clear previous results
-      let serialNumber = 1;
-  
-      sellers.forEach((data) => {
-        const listItem = document.createElement("li");
-        listItem.classList.add("seller-item");
-  
-        listItem.innerHTML = `
-          <div style="width: 60px;">${serialNumber++}</div>
-          <div style="width: 150px;">${data.sellerName}</div>
-          <div style="width: 100px;">${data.totalAmount}</div>
-          <div style="width: 100px;">${data.balanceAmount || 0}</div>
-          <div>
-            <img src="./icons/${data.balanceAmount === 0 ? "paid" : "pending"}.png" alt="">
-          </div>
-        `;
-  
-        sellerList.appendChild(listItem);
-      });
-  
-      if (sellers.length === 0) {
-        sellerList.innerHTML = "No results found!";
-      }
+
+    const tableBody = document.querySelector("#itemTable tbody");
+
+    const saveButton = document.getElementById("saveButton");
+    const confirmDeleteModal = new bootstrap.Modal(document.getElementById("confirmDeleteModal"));
+    const confirmDeleteButton = document.getElementById("confirmDeleteButton");
+
+    let rowToDelete = null;
+
+    const totalDateInput = document.getElementById('totalDate');
+
+    // Get the current date in the format YYYY-MM-DD
+    const currentDate = new Date().toISOString().split('T')[0];
+
+    // Set the value of the input element
+    totalDateInput.value = currentDate;
+
+    function calculateSumByDate() {
+        const totalDate = document.getElementById('totalDate').value; // Get the selected date
+        const totalDeptSpan = document.getElementById('totalDept'); // Get the span to display the total
+        const rows = document.querySelectorAll('tr'); // Get all table rows
+        let sum = 0; // Initialize the sum
+
+        rows.forEach((row) => {
+            const dateInput = row.querySelector('.debit-date'); // Find the debit-date input in the row
+            const amountInput = row.querySelector('.debit-amount'); // Find the debit-amount input in the row
+
+            if (dateInput && amountInput) {
+                const rowDate = dateInput.value; // Get the date value of the row
+                const amount = parseFloat(amountInput.value) || 0; // Get the amount value or 0
+
+                // Add the amount to the sum if the row date matches the selected date
+                if (rowDate === totalDate) {
+                    sum += amount;
+                }
+            }
+        });
+
+        // Display the total sum
+        totalDeptSpan.textContent = sum.toFixed(2);
     }
-  
-    // Function to fetch all sellers in real-time
-    function fetchAllSellersRealTime() {
-      if (unsubscribe) unsubscribe(); // Remove previous listener if it exists
-  
-      const sellersRef = collection(db, "purchase");
-      unsubscribe = onSnapshot(sellersRef, (snapshot) => {
-        const sellers = snapshot.docs.map((doc) => doc.data());
-        renderSellerList(sellers);
-      });
-    }
-  
-    // Function to search sellers by name
-    async function searchSellersByName(name) {
-      try {
-        if (unsubscribe) {
-          unsubscribe(); // Stop real-time updates during search
-          unsubscribe = null;
+
+    // Event listener to calculate the sum when the date changes
+    document.getElementById('totalDate').addEventListener('change', calculateSumByDate);
+
+    // Event listener to calculate the sum when an amount is updated
+    document.addEventListener('input', (event) => {
+        if (event.target.classList.contains('debit-amount') || event.target.classList.contains('debit-date')) {
+            calculateSumByDate();
         }
-  
-        const sellerRef = collection(db, "purchase");
-        const nameQuery = query(
-          sellerRef,
-          where("sellerName", ">=", name),
-          where("sellerName", "<=", name + "\uf8ff"),
-        
-        );
-  
-        const snapshot = await getDocs(nameQuery); // One-time fetch
-        const sellers = snapshot.docs.map((doc) => doc.data());
-        renderSellerList(sellers);
-      } catch (error) {
-        console.error("Error searching sellers: ", error);
-      }
-    }
-  
-    // Real-time search event listener
-    searchField.addEventListener("input", () => {
-      const searchValue = searchField.value.trim();
-  
-      if (searchValue) {
-        searchSellersByName(searchValue);
-      } else {
-        fetchAllSellersRealTime(); // Revert to real-time updates when search is cleared
-      }
     });
-  
-    // Initial real-time fetch on page load
-    fetchAllSellersRealTime();
-  </script>
-  
+
+
+
+
+
+
+    // Fetch data from Firestore and populate the table
+    async function fetchData() {
+        try {
+            const querySnapshot = await getDocs(collection(db, "debit"));
+            tableBody.innerHTML = ""; // Clear the table before adding new rows
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                addRowToTable({ ...data, id: doc.id });
+            });
+        } catch (error) {
+            console.error("Error fetching data:", error);
+        }
+    }
+
+    // Add a new row to the table
+    // Function to add a row to the table
+    function addRowToTable(data = {}) {
+        calculateSumByDate();
+        // saveButton.style.display = "flex"; 
+        const newRow = document.createElement("tr");
+        const now = new Date();
+        const currentDate = data.date || now.toISOString().split("T")[0]; // Format as YYYY-MM-DD
+        const currentTime = data.time || now.toTimeString().split(" ")[0].slice(0, 5); // Format as HH:MM
+        newRow.dataset.id = data.id || ""; // Store Firestore document ID
+
+        newRow.innerHTML = `
+        <td></td>
+        <td><input type="date" class="form-control debit-date" value="${data.date || currentDate}" /></td>
+        <td><input type="time" class="form-control debit-time" value="${data.time || currentTime}" /></td>
+        <td><input type="text" class="form-control debit-name" value="${data.name || ''}" /></td>
+        <td><input type="text" class="form-control debit-description" value="${data.description || ''}" /></td>
+        <td><input type="number" class="form-control debit-amount" value="${data.amount || ''}" /></td>
+        <td>
+            <button style="display:none" class="btn btn-danger btn-sm delete-row">Delete</button>
+        </td>
+    `;
+
+        // Append the new row to the table body
+        tableBody.appendChild(newRow);
+        updateSerialNumbers();
+
+        // Add delete button functionality
+        const deleteButton = newRow.querySelector(".delete-row");
+
+    }
+    // Save changes to Firestore
+    async function saveChanges() {
+        const rows = tableBody.querySelectorAll("tr");
+        for (const row of rows) {
+            const name = row.querySelector(".debit-name").value.trim(); // Ensure no whitespace issues
+            if (!name) {
+                alert("Name is required to save changes.");
+                return; // Skip saving if the name is empty
+            }
+
+            const date = row.querySelector(".debit-date").value;
+            const time = row.querySelector(".debit-time").value;
+            const description = row.querySelector(".debit-description").value;
+            const amount = row.querySelector(".debit-amount").value;
+
+            const data = { date, time, name, description, amount };
+
+            try {
+                // Use 'setDoc' to create or overwrite a document with the ID as 'name'
+                await setDoc(doc(db, "debit", name), data);
+                row.dataset.id = name; // Update row with the custom ID (name)
+            } catch (error) {
+                console.error("Error saving data:", error);
+                alert(`Failed to save changes for ${name}: ${error.message}`);
+            }
+        }
+        // calculateSumByDate();
+        showCustomAlert("Changes saved successfully!", "success", 1000);
+
+
+    }
+
+
+
+    // Event listener for delete confirmation button in the modal
+
+    document.addEventListener("click", (event) => {
+        if (event.target.classList.contains("delete-row")) {
+            const row = event.target.closest("tr");
+            const debitName = row.querySelector(".debit-name").value;
+
+            // Show delete confirmation modal
+            const modal = new bootstrap.Modal(document.getElementById("deleteConfirmationModal"));
+            modal.show();
+
+            // Confirm delete button click event
+            const confirmDeleteButton = document.getElementById("confirmDelete");
+            confirmDeleteButton.onclick = async () => {
+                try {
+                    // Delete document from Firestore
+                    await deleteDoc(doc(db, "debit", debitName));
+
+                    // Remove the row from the table
+                    row.remove();
+
+                    // Hide the modal
+                    modal.hide();
+                    showCustomAlert("Record deleted successfully.", "error", 1000);
+
+                } catch (error) {
+                    console.error("Error deleting document: ", error);
+                    alert("Failed to delete the record.");
+                }
+            };
+        }
+    });
+
+    document.getElementById("searchField").addEventListener("input", (event) => {
+        const searchValue = event.target.value.toLowerCase(); // Get the search input and convert it to lowercase
+        const rows = tableBody.querySelectorAll("tr"); // Get all table rows
+
+        rows.forEach((row) => {
+            const itemNameCell = row.querySelector(".debit-name"); // Selector for the item name column
+
+
+            const itemName = itemNameCell ? itemNameCell.value.toLowerCase() : ""; // Get the item name value
+
+
+            // Show the row if either the name or code includes the search input
+            if (itemName.includes(searchValue)) {
+                row.style.display = ""; // Show the row
+            } else {
+                row.style.display = "none"; // Hide the row
+            }
+        });
+
+        // Optionally, update serial numbers for visible rows
+        updateSerialNumbers();
+    });
+
+
+
+
+    // Update serial numbers
+    function updateSerialNumbers() {
+        const rows = tableBody.querySelectorAll("tr");
+        rows.forEach((row, index) => {
+            const serialCell = row.querySelector("td:first-child");
+            if (serialCell) {
+                serialCell.textContent = index + 1; // Update serial number
+            }
+        });
+    }
+
+    // Add button event listener
+    addButton.addEventListener("click", () => {
+        addRowToTable(); // Add a new empty row
+    });
+
+    // Save button event listener
+    saveButton.addEventListener("click", saveChanges);
+
+    // Fetch data on page load
+    document.addEventListener("DOMContentLoaded", fetchData);
+    function showCustomAlert(message, type = "success", timeout = 1000) {
+        const container = document.getElementById("customAlertContainer");
+
+        // Create alert div
+        const alert = document.createElement("div");
+        alert.className = `custom-alert ${type}`;
+        alert.innerHTML = `
+    <span>${message}</span>
+    <button class="close-btn" onclick="this.parentElement.remove()">&times;</button>
+  `;
+
+        // Append alert to container
+        container.appendChild(alert);
+
+        // Remove alert after timeout
+        setTimeout(() => {
+            alert.style.opacity = "0"; // Start fade-out
+            alert.addEventListener("transitionend", () => alert.remove()); // Remove after transition ends
+        }, timeout);
+    }
+
+</script>
+
+
+
 
 </html>

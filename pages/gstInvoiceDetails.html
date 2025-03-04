@@ -16,17 +16,22 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-firestore.js"></script>
 
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <link rel="stylesheet" href="./invoiceDetails.css">
+    <link rel="stylesheet" href="./gstinvoicedet.css">
 </head>
 
 <body>
     <nav class="navbar">
         <div class="iconDiv"><img src="./icons/home.png" title="home" onclick="home()"></div>
-        <div class="iconDiv"><img src="./icons/new bill.png" title="new bill" onclick="newBill()"></div>
+        <div class="iconDiv"><img src="./icons/gst logo.png" title="new bill" onclick="newBill()"></div>
         <div class="iconDiv"><img src="./icons/ledger.png" title="ledger" onclick="ledger()"></div>
-        <div class="iconDiv"><img src="./icons/customer nav.png" alt=""></div>
-        <div class="iconDiv"><img src="./icons/debit.png" alt=""></div>
-        <div class="iconDiv"><img src="./icons/overview.png" alt=""></div>
+        <div class="iconDiv"><img src="./icons/customer nav.png" title="customers" onclick="customers()"></div>
+        <div class="iconDiv"><img src="./icons/inventory-management.png" title="store" onclick="inventory()"></div>
+        <div class="iconDiv"><img src="./icons/debt.png" title="debit" onclick="debit()"></div>
+        <div class="iconDiv"><img src="./icons/overview nav.png" title="overviw" onclick="overview()"></div>
+        <div class="iconDiv"><img src="./icons/bell.png" title="Notification" onclick="notification()"></div>
+        <div class="iconDiv"><img src="./icons/info.png" title="info" onclick="info()"></div>
+        <div class="iconDiv"><img src="./icons/logout.png" title="logout" onclick=""></div>
+
 
     </nav>
     <div class="homeContainer">
@@ -48,52 +53,82 @@
 
         <div class="homeBody">
             <!-- Form to add a new product -->
-            <span id="heading">Invoice</span>
+            <span id="heading">GST-Invoice</span>
             <div class="billBox">
 
                 <div class="form-container " id="billForm">
                     <div class="inputboxes">
                         <!-- <div class="inputDiv"> -->
                         <div>
-                            <label for="invoiceNumber" class="form-label">Invoice No:</label>
-                            <!-- Input field with datalist for suggestions -->
-                            <input type="text" class="form-control input" id="invoiceNumber" placeholder="Enter invoice"
-                                list="" autocomplete="off" readonly>
-                            <!-- Datalist for customer name suggestions -->
-                            <datalist id=""></datalist>
-                        </div>
-                        <div>
-                            <label for="customerNameName" class="form-label">Customer Name:</label>
+                            <label for="customerNameName" class="form-label">Name:</label>
                             <!-- Input field with datalist for suggestions -->
                             <input type="text" class="form-control input" id="customerNameName"
                                 placeholder="Enter Customer Name" list="customerSuggestions" autocomplete="off"
-                                readonly>
+                                required>
+                            <!-- Datalist for customer name suggestions -->
+                            <datalist id="customerSuggestions"></datalist>
+                        </div>
+                        <div>
+                            <label for="address" class="form-label">Address :</label>
+                            <!-- Input field with datalist for suggestions -->
+                            <input type="text" class="form-control input" id="address" placeholder="Enter Address"
+                                list="customerSuggestions" autocomplete="off" maxlength="30" required>
                             <!-- Datalist for customer name suggestions -->
                             <datalist id="customerSuggestions"></datalist>
                         </div>
 
 
                         <div>
-                            <label for="phoneNumber" class="form-label">Phone Number:</label>
+                            <label for="phoneNumber" class="form-label">Phone:</label>
                             <!-- Phone number field, editable if no matching customer is selected -->
-                            <input type="text" class="form-control input" id="phoneNumber"
-                                placeholder="Enter Phone Number" maxlength="10" readonly>
+                            <input type="tel" class="form-control input" id="phoneNumber"
+                                placeholder="Enter Phone Number" maxlength="10" required>
                         </div>
                         <!-- </div> -->
                         <div>
-                            <label for="salesMan" class="form-label">Sales Man:</label>
+                            <label for="gstin" class="form-label">GSTIN :</label>
                             <!-- Phone number field, editable if no matching customer is selected -->
-                            <input type="name" class="form-control input" id="salesMan" placeholder="Enter Name">
+                            <input type="text" class="form-control input" id="gstin" placeholder="Enter GSTIN">
                         </div>
 
 
 
 
                         <!-- <div class="inputDiv"> -->
+
+                        <div>
+                            <label for="vehicleno" class="form-label">Vehicle No:</label>
+                            <input type="text" id="vehicleno" class="form-control input" placeholder="vehicle number"
+                                required>
+
+                        </div>
+                        <div>
+                            <label for="transmode" class="form-label">Trans Mode:</label>
+                            <input type="text" id="transmode" class="form-control input"
+                                placeholder="Transportation Mode" required>
+
+                        </div>
+                        <div>
+                            <label for="dlplace" class="form-label">Delivery:</label>
+                            <input type="text" id="dlplace" class="form-control input" placeholder="Delivery Place"
+                                required>
+
+                        </div>
+                        <div>
+                            <label for="state" class="form-label">State:</label>
+                            <input type="text" id="state" class="form-control input" placeholder="State" required>
+
+                        </div>
                         <div>
                             <label for="dateField" class="form-label">Select Date:</label>
-                            <input type="text" id="dateField" class="form-control inputTrans" readonly
-                                placeholder="dd-mm-yyyy" aria-readonly="">
+                            <input type="text" id="dateField" class="form-control input" placeholder="dd-mm-yyyy"
+                                required>
+
+                        </div>
+                        <div>
+                            <label for="duedate" class="form-label">Due Date:</label>
+                            <input type="date" id="duedate" class="form-control input" placeholder="dd-mm-yyyy"
+                                required>
 
                         </div>
 
@@ -106,7 +141,6 @@
 
                             </select>
                         </div>
-
                         <!-- </div> -->
                         <!-- <div class="inputDiv"> -->
 
@@ -118,6 +152,7 @@
                                 <option value="UPI">UPI</option>
                             </select>
                         </div>
+
                     </div>
                     <!-- </div> -->
 
@@ -132,21 +167,28 @@
                     </div>
 
                     <div class="tableContainer">
-                        <table class="table table-bordered" id="itemTable">
+                        <table class="table table-bordered text-center" id="itemTable">
                             <thead>
                                 <tr>
-                                    <th style="width: 5%;">S/N</th>
-                                    <th style="width: 10%;">Item Code</th>
-                                    <th style="width: 20%;">Item Name</th>
-                                    <th style="width: 7%;">Qty</th>
-                                    <th style="width: 8%;">Unit</th>
-                                    <th style="width: 10%;">Rate</th>
-                                    <th style="width: 11%;">Amount</th>
-                                    <th style="width: 10%;">MRP</th>
-                                    <th style="width: 10%;">WSP</th>
-                                    <th style="width: 10%;">Stock</th>
-                                    <th style="width: 5%;"></th>
+                                    <th style="width: 4%;">S/N</th>
+                                    <th style="width: 8%;">Item Code</th>
+                                    <th style="width: 8%;">HSN Code</th>
+                                    <th style="width: 15%;">Item Name</th>
+                                    <th style="width: 6%;">Qty</th>
+                                    <th style="width: 6%;">Unit</th>
+                                    <th style="width: 8%;">Rate</th>
+                                    <th style="width: 9%;">Amount</th>
+                                    <th style="width: 7%;">GST (%)</th>
+                                    <th style="width: 7%;">CGST</th>
+                                    <th style="width: 7%;">SGST</th>
+                                    <th style="width: 9%;">Total</th>
+                                    <th style="width: 7%;">MRP</th>
+                                    <th style="width: 7%;">WSP</th>
+                                    <th style="width: 7%;">Stock</th>
+                                    <th style="width: 3%;"></th>
                                 </tr>
+
+                            </thead>
                             <tbody>
                                 <!-- Rows will be dynamically added here -->
                             </tbody>
@@ -155,20 +197,20 @@
 
                     <div class="bottomRow">
                         <div class="rowGrid">
+                            <span>Taxable Amount : <span id="taxableamount"></span></span>
                             <span>Old Balance : <span id="currentBalance"></span></span>
                             <span style="color: red;">Running Balance : <span id="balanceAmount"></span></span>
                         </div>
                         <div class="rowGrid">
-                            <span>Net Amount :<span id="credtotal"></span></span>
+                            <span>Total After Tax :<span id="credtotal"></span></span>
+                            <span>Tax Amount GST : <span id="taxamount"></span></span>
                             <span>Paying Amount : <input type="number" name="" id="initialPayment"
                                     class=" input"></span>
                         </div>
                         <div class="buttonGroup">
-                            <div class="buttons" id="print" style="background-color: rgb(211, 173, 0);display: none;">
-                                Print</div>
-                            <div class="buttons" id="savefb" style="background-color: rgb(5, 165, 173);display: none;">
-                                Update</div>
-                            <!-- <div class="buttons" id="creditsave" style="display: none;">Save & Print</div> -->
+                            <div class="buttons" id="print" style="background-color: rgb(211, 173, 0);">Print</div>
+                            <div class="buttons" id="savefb" style="background-color: rgb(5, 165, 173);">Save</div>
+                            <div class="buttons" id="creditsave">Save & Print</div>
                         </div>
                     </div>
                 </div>
@@ -196,7 +238,7 @@
                 <div class="values">
                     <div id="creditFields" class="gap-0  ">
                         <div>
-                            <label for="" class="form-label">Paying Amount:</label>
+                            <label for="initialPayment" class="form-label">Paying Amount:</label>
                             <input type="number" id="" class="form-control" placeholder="Enter paying Amount">
 
                         </div>
@@ -261,11 +303,14 @@
             // Retrieve query parameters
             const { invoiceNo, customerName } = getQueryParams();
 
+            console.log(invoiceNo, customerName);
+
+
             // Display the values on the target page
 
             // Set the numeric part in the input box
-            document.getElementById('invoiceNumber').value = invoiceNo;
-            document.getElementById('customerNameName').value = ` ${customerName}`;
+            // document.getElementById('invoiceNumber').value = invoiceNo;
+            document.getElementById('customerNameName').value = customerName;
 
             window.invoice = invoiceNo
 
@@ -352,17 +397,23 @@
                             // Populate details from `invoiceNumbers` if found
                             if (index !== -1) {
                                 const iNVNO = invoiceNumbers[index];
-                                console.log(`Array containing the invoice:`, iNVNO);
+                                // console.log(`Array containing the invoice:`, iNVNO);
                                 const paidAmount = iNVNO.paidAmount;
 
 
                                 document.getElementById("phoneNumber").value = iNVNO.phoneNumber || "";
-                                document.getElementById("salesMan").value = iNVNO.salesman || "";
+                                document.getElementById("address").value = iNVNO.address || "";
+                                document.getElementById("gstin").value = iNVNO.gstin || "";
+                                document.getElementById("vehicleno").value = iNVNO.vehicleno || "";
+                                document.getElementById("transmode").value = iNVNO.trmode || "";
+                                document.getElementById("dlplace").value = iNVNO.dlplace || "";
+                                document.getElementById("state").value = iNVNO.state || "";
+                                document.getElementById("duedate").value = iNVNO.duedate || "";
                                 document.getElementById("dateField").value = iNVNO.date || "";
-                                const trType = iNVNO.transactionType;
-                                console.log(trType);
+                                // const trType = iNVNO.transactionType;
+                                // console.log(trType);
 
-                                document.getElementById("transactionType").value =iNVNO.transactionType;
+                                document.getElementById("transactionType").value = iNVNO.transactionType;
 
 
 
@@ -372,8 +423,11 @@
                                     window.paidAmount = parseFloat(e.target.value) || 0; // Update `window.paidAmount` dynamically
                                 });
                                 document.getElementById("credtotal").textContent = iNVNO.totalAmount || "";
+                                document.getElementById("taxableamount").textContent = iNVNO.taxableamount || "0";
                                 document.getElementById("balanceAmount").textContent = iNVNO.balanceAmount || "0";
                                 document.getElementById("currentBalance").textContent = iNVNO.oldbalance || "0";
+                                document.getElementById("taxamount").textContent = iNVNO.taxamountgst || "0";
+
 
                                 // Passing variable to other function
                                 window.paidAmount = paidAmount;
@@ -389,7 +443,7 @@
                             // Populate details from `transactionHistory` if found
                             if (indext !== -1) {
                                 const tRansHist = transactionHistory[indext];
-                                console.log(`Transaction history:`, tRansHist);
+                                // console.log(`Transaction history:`, tRansHist);
                             }
                         }
                     }
@@ -430,6 +484,7 @@
                         placeholder="Item Code" value="${item.itemCode || ""}">
                     <datalist id="item-code-suggestions"></datalist>
                 </td>
+                <td><input type="number" class="item-hsn" placeholder="hsn" value="${item.itemHSN || ""}"></td>
                 <td>
                     <input type="text" class="item-name-input" list="item-name-suggestions" 
                         placeholder="Item Name" value="${item.itemName || ""}">
@@ -449,6 +504,19 @@
                 </td>
                 <td>
                     <span class="amount-text">${(item.itemAmount || 0).toFixed(2)}</span>
+                </td>
+                <td>
+                    <input type="text" class="gstRate" placeholder="(%)" 
+                        value="${item.itemGSTrate || ""}" >
+                </td>
+                <td>
+                    <span class="cgst">${(item.itemCGST || 0).toFixed(2)}</span>
+                </td>
+                <td>
+                    <span class="sgst">${(item.itemSGST || 0).toFixed(2)}</span>
+                </td>
+                <td>
+                    <span class="total">${(item.itemTotal || 0).toFixed(2)}</span>
                 </td>
                 <td>
                     <span class="mrp">${(item.itemMRP || 0).toFixed(2)}</span>
@@ -498,11 +566,11 @@
             // Call the function with the desired invoice number
             checkInvoiceNumber(invoiceNo);
 
-            document.addEventListener("DOMContentLoaded", () => {
-                const transactionType = iNVNO.transactionType;
-                console.log("Transaction Type:", transactionType); // Check value
-                document.getElementById("transactionType").value = transactionType;
-            });
+            // document.addEventListener("DOMContentLoaded", () => {
+            //     const transactionType = iNVNO.transactionType;
+            //     console.log("Transaction Type:", transactionType); // Check value
+            //     document.getElementById("transactionType").value = transactionType;
+            // });
 
 
 
@@ -637,13 +705,24 @@
                 try {
                     // Fetch form data
                     const customerName = document.getElementById("customerNameName").value.trim();
+                    const address = document.getElementById("address").value.trim();
                     const phoneNumber = document.getElementById("phoneNumber").value.trim();
                     const date = document.getElementById("dateField").value.trim();
-                    const salesman = document.getElementById("salesMan").value.trim();
+                    const duedate = document.getElementById("duedate").value.trim();
+                    const vehicleno = document.getElementById("vehicleno").value.trim();
+                    const trmode = document.getElementById("transmode").value.trim();
+                    const dlplace = document.getElementById("dlplace").value.trim();
+                    const state = document.getElementById("state").value.trim();
+                    const gstin = document.getElementById("gstin").value.trim();
                     const transactionType = document.getElementById("transactionType").value.trim();
+                    // console.log(transactionType);
+
                     const transactionMode = document.getElementById("transactionMode").value.trim();
                     const initialPayment = parseFloat(document.getElementById("initialPayment").value || "0");
                     const totalAmount = parseFloat(document.getElementById("credtotal").textContent || "0");
+                    const balanceAmount = parseFloat(document.getElementById("balanceAmount").textContent || "0");
+                    const taxamountgst = parseFloat(document.getElementById("taxamount").textContent || "0");
+                    const taxableamount = parseFloat(document.getElementById("taxableamount").textContent || "0");
 
                     // Validations
                     if (initialPayment === totalAmount && transactionType === "credit") {
@@ -659,11 +738,16 @@
                     const rows = document.querySelectorAll("#itemTable tbody tr");
                     rows.forEach((row) => {
                         const itemCode = row.querySelector(".item-code-input").value.trim();
+                        const itemHSN = row.querySelector(".item-hsn").value.trim();
                         const itemName = row.querySelector(".item-name-input").value.trim();
                         const itemQty = parseFloat(row.querySelector(".qty-input").value || "0");
                         const itemUnit = row.querySelector(".unit-input").value.trim();
                         const itemRate = parseFloat(row.querySelector(".rate-input").value || "0");
                         const itemAmount = parseFloat(row.querySelector(".amount-text").textContent || "0");
+                        const itemGSTrate = parseFloat(row.querySelector(".gstRate").value || "0");
+                        const itemCGST = parseFloat(row.querySelector(".cgst").textContent || "0");
+                        const itemSGST = parseFloat(row.querySelector(".sgst").textContent || "0");
+                        const itemTotal = parseFloat(row.querySelector(".total").textContent || "0");
                         const itemMRP = parseFloat(row.querySelector(".mrp").textContent || "0");
                         const itemWSP = parseFloat(row.querySelector(".wsp").textContent || "0");
 
@@ -675,10 +759,15 @@
                         updatedItems.push({
                             itemCode,
                             itemName,
+                            itemHSN,
                             itemQty,
                             itemUnit,
                             itemRate,
                             itemAmount,
+                            itemGSTrate,
+                            itemCGST,
+                            itemSGST,
+                            itemTotal,
                             itemMRP,
                             itemWSP,
                         });
@@ -783,13 +872,23 @@
                         if (inv.invoiceNo === invoiceNo) {
                             return {
                                 ...inv,
-                                phoneNumber,
-                                salesman,
-                                date,
                                 transactionType,
+                                date,
+                                duedate,
+                                vehicleno,
+                                trmode,
+                                dlplace,
+                                state,
+                                gstin,
+
+                                customerName,
+                                address,
+                                phoneNumber,
                                 transactionMode,
-                                paidAmount: initialPayment,
                                 totalAmount,
+                                taxamountgst,
+                                taxableamount,
+                                paidAmount: initialPayment,
                                 balanceAmount: totalAmount - initialPayment,
                                 items: updatedItems,
                             };
@@ -855,9 +954,11 @@
             }
 
             // Button event listeners
+
             document.getElementById("savefb").addEventListener("click", async () => {
                 try {
-                    const invoiceNo = document.getElementById("invoiceNumber").value.trim(); // Ensure invoice number is provided
+                    const invoiceNo = window.invoice
+                    // Ensure invoice number is provided
                     if (!invoiceNo) {
                         showAlert("Invoice number is required!", 3000);
                         return;
@@ -933,25 +1034,31 @@
                 const row = document.createElement("tr");
                 window.row = row
                 row.innerHTML = `
-        <td>${rowCount}</td>
+      <td>${rowCount}</td>
         <td>
             <input type="number" class="item-code-input" list="item-code-suggestions" placeholder="Item Code">
             <datalist id="item-code-suggestions"></datalist>
         </td>
+         <td><input type="number" class="item-hsn" placeholder="hsn"></td>
         <td>
             <input type="text" class="item-name-input" list="item-name-suggestions" placeholder="Item Name">
             <datalist id="item-name-suggestions"></datalist>
-        </td>
-        <td><input type="number" class="qty-input" oninput="validateQty(this)" placeholder="Qty"></td>
+        </td> 
+        <td><input type="number" class="qty-input" oninput="validateQty(this)"placeholder="Qty"></td>
         <td><input type="text" class="unit-input" placeholder="Unit" readonly></td>
         <td><input type="number" class="rate-input" placeholder="Rate"></td>
         <td><span class="amount-text">0</span></td>
+        <td><input  class="gstRate"></input></td>
+        <td><span class="cgst">0</span></td>
+        <td><span class="sgst">0</span></td>
+        <td><span class="total">0</span></td>
         <td><span class="mrp">0</span></td>
         <td><span class="wsp">0</span></td>
-        <td><span class="stock">0</span></td>
+        <td><span class="stock" >0</span></td>
         <td><span class="delete-btn" onclick="deleteRow(this)"><img src="./icons/cross.png" width="15px" alt=""></span></td>
     `;
                 itemTable.appendChild(row);
+                row.querySelector(".gstRate").value = 18
 
                 attachAutoCalculationListeners(row);
 
@@ -963,7 +1070,6 @@
                 attachEventListenerToInput(itemNameInput, "itemName", row);
             };
 
-            // Attach event listeners to inputs
             const attachEventListenerToInput = (inputElement, field, row) => {
                 const dataListId = field === "itemCode" ? "item-code-suggestions" : "item-name-suggestions";
                 const dataList = document.getElementById(dataListId);
@@ -990,6 +1096,9 @@
                     if (suggestions.length > 0) {
                         const item = suggestions[0]; // Use the first matching item
                         row.querySelector(".item-code-input").value = item.itemCode || "";
+                        console.log(item.hsn);
+
+                        row.querySelector(".item-hsn").value = item.hsn || "";
                         row.querySelector(".item-name-input").value = item.itemName || "";
                         row.querySelector(".unit-input").value = item.unit || "";
                         row.querySelector(".mrp").textContent = item.mrp || 0;
@@ -1119,21 +1228,21 @@
             // Function to calculate the amount dynamically
             function calculateAmount(inputElement) {
                 const row = inputElement.closest("tr"); // Get the row
-                const qtyInput = row.querySelector(".qty-input"); // Get the quantity input
-                const rateInput = row.querySelector(".rate-input"); // Get the rate input
-                const amountText = row.querySelector(".amount-text"); // Get the amount element
+                const unitPrice = parseFloat(row.querySelector(".rate-input").value) || 0;
+                const quantity = parseFloat(row.querySelector(".qty-input").value) || 0;
+                const amountCell = row.querySelector(".amount-text");
+                const credtotal = parseFloat(document.getElementById("credtotal").textContent || "0");
+                const initialPaymentInput = document.getElementById('initialPayment').value;
 
-                const qty = parseFloat(qtyInput.value) || 0; // Parse the quantity value
-                const rate = parseFloat(rateInput.value) || 0; // Parse the rate value
-
-                // Calculate the amount
-                const amount = qty * rate;
-
-                // Update the amount text
-                amountText.textContent = amount.toFixed(2);
-
+                const amount = parseFloat(unitPrice * quantity);
+                amountCell.textContent = amount.toFixed(2);
                 calculateTotalAmount(); // Recalculate the total amount whenever values are updated
                 checkAndAddRow(); // Check if a new row needs to be added
+                FullPaymentCheck();
+                gstCalaculate(row);
+                calculateTotalAmount();
+                calculateSubTotalAmount();
+                calculateTotalGST();
             }
 
 
@@ -1154,6 +1263,87 @@
             // };
 
 
+            const gstCalaculate = (row) => {
+
+                // Get input values and ensure they are numbers
+                const amountCell = parseFloat(row.querySelector(".amount-text").textContent) || 0;
+                const gstrate = parseFloat(row.querySelector(".gstRate").value) || 0;
+
+                // Get target elements for SGST, CGST, and Total
+                const sgst = row.querySelector(".sgst");
+                const cgst = row.querySelector(".cgst");
+                const totalCol = row.querySelector(".total");
+
+                // Calculate GST amount
+                const gstamount = parseFloat(((amountCell * gstrate) / 100).toFixed(2));
+
+
+
+
+
+
+                // Calculate SGST and CGST as half of GST amount
+                sgst.textContent = parseFloat((gstamount / 2).toFixed(2));
+                cgst.textContent = parseFloat((gstamount / 2).toFixed(2));
+
+                // Ensure GST amount is a number for total calculation
+                const total = parseFloat(amountCell + gstamount).toFixed(2);
+                totalCol.textContent = total;
+
+                // Debug logs
+                // console.log("Type of amountCell:", typeof amountCell);
+                // console.log("Type of gstamount:", typeof gstamount);
+                // console.log("GST Amount:", gstamount);
+                calculateTotalGST();
+
+
+            }
+            const calculateTotalGST = () => {
+                let totalSGST = 0;
+                let totalCGST = 0;
+
+                // Get all rows of the table
+                const rows = itemTable.querySelectorAll("tr");
+
+                rows.forEach((row) => {
+                    // Get SGST and CGST values from the row
+                    const sgstValue = parseFloat(row.querySelector(".sgst").textContent) || 0;
+                    // console.log("sgst value :",sgstValue);
+
+                    const cgstValue = parseFloat(row.querySelector(".cgst").textContent) || 0;
+
+                    // Accumulate SGST and CGST
+                    totalSGST += sgstValue;
+                    totalCGST += cgstValue;
+                });
+
+                // Calculate total GST (sum of SGST and CGST)
+                const totalGST = totalSGST + totalCGST;
+
+                // Update the total GST in the DOM
+                document.getElementById('taxamount').textContent = totalGST.toFixed(2);
+
+                // Debug logs
+                // console.log("Total SGST:", totalSGST);
+                // console.log("Total CGST:", totalCGST);
+                // console.log("Total GST:", totalGST);
+            };
+
+
+
+            // Add input listener to all elements with the class 'gstRate'
+            document.addEventListener('input', (event) => {
+                if (event.target.classList.contains('gstRate')) {
+                    const row = event.target.closest('tr'); // Get the table row containing the .gstRate input
+                    gstCalaculate(row);
+                    calculateTotalAmount();
+                    calculateSubTotalAmount();
+
+
+                }
+            });
+
+
 
             const initialPayment = document.getElementById("initialPayment").value;
             const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
@@ -1162,37 +1352,80 @@
             // Calculate total amount
             // Prevent initialPayment from changing on row add/delete
             const calculateTotalAmount = () => {
-                const amounts = document.querySelectorAll('.amount-text');
+                // Select all elements with the 'total' class
+                const totals = document.querySelectorAll('.total');
+
+                // Initialize the sum
                 let sum = 0;
-                amounts.forEach(cell => {
-                    sum += parseFloat(cell.textContent) || 0;
+
+                // Iterate through the totals and add their values to the sum
+                totals.forEach(totalCell => {
+                    const value = parseFloat(totalCell.textContent) || 0; // Convert to number, default to 0 if invalid
+                    sum += value; // Add to the total sum
                 });
 
-                document.getElementById('total').textContent = sum.toFixed(0);
-                document.getElementById('credtotal').textContent = sum.toFixed(0);
-
-                // Call other dependent functions, but do not modify initialPayment
+                // Log the total sum
+                console.log("Total Sum:", sum);
+                document.getElementById('credtotal').textContent = sum.toFixed(0)
                 FullPaymentCheck();
-                updateBalance(); // Update balance based on existing initialPayment
+                // updateBalance();
             };
-            //FullPayment check logic updated to ensure initialPayment is user-controlled
+            const calculateSubTotalAmount = () => {
+                // Select all elements with the 'total' class
+                const amounts = document.querySelectorAll('.amount-text');
+
+                // Initialize the sum
+                let sum = 0;
+
+                // Iterate through the totals and add their values to the sum
+                amounts.forEach(Cell => {
+                    const value = parseFloat(Cell.textContent) || 0; // Convert to number, default to 0 if invalid
+                    sum += value; // Add to the total sum
+                });
+
+                // Log the total sum
+                console.log("Total Sum:", sum);
+                document.getElementById('taxableamount').textContent = sum.toFixed(2)
+
+                // updateBalance();
+            };
             function FullPaymentCheck() {
+
+
+
                 const transactionType = document.getElementById("transactionType").value;
                 const credtotal = parseFloat(document.getElementById("credtotal").textContent || "0");
-                const initialPaymentInput = document.getElementById('initialPayment').value;
-                const totalAmount = parseFloat(document.getElementById("total").textContent || "0");
+                const initialPayment = document.getElementById('initialPayment').value || 0;
+
                 // console.log(credtotal);
 
+                // console.log("transaction",transactionType);
 
                 if (transactionType === "Full Payment") {
 
                     document.getElementById("balanceAmount").textContent = "0";
-                    initialPaymentInput.value = totalAmount
-                } else {
-                    initialPaymentInput.value = "0"
-                    updateBalance(); // Only update balance; do not modify initialPayment
+                    document.getElementById('initialPayment').value = document.getElementById('credtotal').textContent
+
+
+                } else if (transactionType === "credit") {
+                    // console.log("transaction",transactionType);
+                    document.getElementById('initialPayment').value = ""
+                    document.getElementById("balanceAmount").textContent = (document.getElementById('credtotal').textContent) - (document.getElementById('initialPayment').value) || 0
+                    updateBalance();
+                    // Only update balance; do not modify initialPayment
                 }
+
+
+
             }
+            document.getElementById("transactionType").addEventListener("click", () => {
+                FullPaymentCheck();
+            });
+
+
+
+
+
 
 
             // document.getElementById("transactionType").addEventListener("click", () => {
@@ -1226,10 +1459,10 @@
 
             // credit selected
             // const transactionType = document.getElementById('transactionType');
-            const creditFields = document.getElementById('creditFields');
-            const initialPaymentInput = document.getElementById('initialPayment');
-            const balanceAmountSpan = document.getElementById('balanceAmount');
-            document.getElementById('initialPayment').value = 0;
+            // const creditFields = document.getElementById('creditFields');
+            // const initialPaymentInput = document.getElementById('initialPayment');
+            // const balanceAmountSpan = document.getElementById('balanceAmount');
+            // document.getElementById('initialPayment').value = 0;
 
 
             // Total payable amount (Example value, you can replace it dynamically)
@@ -1243,19 +1476,17 @@
 
             // Function to update the balance based on total amount and initial payment
             // Function to update the balance based on total amount and initial payment
+
             const updateBalance = () => {
-                const totalAmount = parseFloat(document.getElementById('credtotal').textContent) || 0;
-                const initialPayment = parseFloat(document.getElementById("initialPayment").value) || 0; // Ensure initialPayment is always parsed
+                const totalAmount = parseFloat(document.getElementById('credtotal').textContent) || 0
+                console.log("total", totalAmount);
 
-                // Prevent the user from entering a value greater than the total amount
-                if (initialPayment.value > totalAmount) {
-                    initialPaymentInput.value = totalAmount;
-                }
-
+                const initialPayment = parseFloat(document.getElementById('initialPayment').value) || 0
+                console.log("ip", initialPayment);
                 const balance = totalAmount - initialPayment;
-                console.log(balance);
+                console.log("balance", balance);
+                document.getElementById('balanceAmount').textContent = balance.toFixed(2);
 
-                document.getElementById("balanceAmount").textContent = balance
             };
 
             // Attach the `updateBalance` function to relevant events
@@ -1265,23 +1496,7 @@
             ////main changing initial payment input bug function
 
 
-            document.getElementById("initialPayment").addEventListener('input', () => {
 
-                const totalAmount = parseFloat(document.getElementById('credtotal').textContent) || 0;
-                const initialPayment = (document.getElementById("initialPayment"));
-
-
-                console.log(initialPayment.value, totalAmount);
-
-
-                // Validate the input value but allow updates even if totalAmount is zero
-                if (initialPayment.value > totalAmount) {
-                    document.getElementById("initialPayment").value = totalAmount;
-
-                }
-                updateBalance();
-                //  // Update the balance after validation
-            });
 
 
 
@@ -1290,23 +1505,58 @@
             const originalCalculateTotalAmount = calculateTotalAmount;
             window.calculateTotalAmount = () => {
                 originalCalculateTotalAmount(); // Call the original function to calculate total
-                updateBalance(); // Update the balance after recalculating the total
+                // updateBalance(); // Update the balance after recalculating the total
             };
+            document.getElementById('initialPayment').addEventListener('input', () => {
+                const totalAmount = parseFloat(document.getElementById('credtotal').textContent) || 0;
+                const initialPayment = parseFloat(document.getElementById('initialPayment').value) || 0;
 
-            navigate.addEventListener("click", () => {
-                window.history.back();
+                // Prevent the user from entering a value greater than the total amount
+                if (initialPayment > totalAmount) {
+                    document.getElementById('initialPayment').value = totalAmount;
+                }
+                updateBalance(); // Update the balance after validation
             });
 
+
+
             function home() {
-                window.location.href = "./homePage.html"
+
+                window.open('./homePage.html', '_blank');
             }
             function newBill() {
-                window.open('./bill.html', '_blank');
+                window.open('./gstbill.html', '_blank');
 
             }
             function ledger() {
-                window.location.href = "./ledger.html"
+
+                window.open('./gstledger.html', '_blank');
             }
+            function customers() {
+
+                window.open('./gstcustomers.html', '_blank');
+            }
+            function inventory() {
+
+                window.open('./inventory.html', '_blank');
+            }
+            function debit() {
+
+                window.open('./debit.html', '_blank');
+            }
+            function overview() {
+
+                window.open('./overview.html', '_blank');
+            }
+            function notification() {
+
+                window.open('./gstnotification.html', '_blank');
+            }
+            function info() {
+
+                window.open('./info.html', '_blank');
+            }
+
 
 
 

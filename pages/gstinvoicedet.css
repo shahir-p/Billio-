@@ -18,8 +18,8 @@ body {
 }
 
 .iconDiv {
-    width: 50px;
-    height: 50px;
+    width: 40px;
+    height: 40px;
     /* background-color: green; */
     cursor: pointer;
 
@@ -110,6 +110,12 @@ body {
     row-gap: 10px;
     
 }
+.inputboxes div{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
 .flexdiv{
     display: flex;
     justify-content: center;
@@ -122,22 +128,26 @@ input {
     padding: 0px;
 }
 
-label {
-    font-size: 18px;
+.form-label {
+    font-size: 15px;
 }
 
 .input {
-    height: 40px;
+    margin-left: 8px;
+    height: 35px;
     width: 240px;
     border: 1px solid black;
     padding-left: 10px;
+    font-size: 15px;
 }
 
 .inputTrans {
-    height: 40px;
+    margin-left: 8px;
+    height: 35px;
     width: 170px;
     border: 1px solid black;
     padding-left: 10px;
+    font-size: 15px;
 }
 
 .tableContainer {

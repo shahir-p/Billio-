@@ -23,13 +23,14 @@
 <body>
     <nav class="navbar">
         <div class="iconDiv"><img src="./icons/home.png" title="home" onclick="home()"></div>
-        <div class="iconDiv"><img src="./icons/new bill.png" title="new bill" onclick="newBill()"></div>
+        <div class="iconDiv"><img src="./icons/gst logo.png" title="new bill" onclick="newBill()"></div>
         <div class="iconDiv"><img src="./icons/ledger.png" title="ledger" onclick="ledger()"></div>
         <div class="iconDiv"><img src="./icons/customer nav.png" title="customers" onclick="customers()"></div>
         <div class="iconDiv"><img src="./icons/inventory-management.png" title="store" onclick="inventory()"></div>
-        <div class="iconDiv"><img src="./icons/debt.png" title="debit" onclick=""></div>
-        <div class="iconDiv"><img src="./icons/overview nav.png" title="overviw" onclick=""></div>
-        <div class="iconDiv"><img src="./icons/info.png" title="info" onclick=""></div>
+        <div class="iconDiv"><img src="./icons/debt.png" title="debit" onclick="debit()"></div>
+        <div class="iconDiv"><img src="./icons/overview nav.png" title="overviw" onclick="overview()"></div>
+        <div class="iconDiv"><img src="./icons/bell.png" title="Notification" onclick="notification()"></div>
+        <div class="iconDiv"><img src="./icons/info.png" title="info" onclick="info()"></div>
         <div class="iconDiv"><img src="./icons/logout.png" title="logout" onclick=""></div>
 
 
@@ -53,14 +54,14 @@
 
         <div class="homeBody">
             <!-- Form to add a new product -->
-            <span id="heading">Bill</span>
+            <span id="heading">GST-Bill</span>
             <div class="billBox">
 
                 <div class="form-container " id="billForm">
                     <div class="inputboxes">
                         <!-- <div class="inputDiv"> -->
                         <div>
-                            <!-- <label for="customerNameName" class="form-label">Customer Name:</label> -->
+                            <label for="customerNameName" class="form-label">Name:</label>
                             <!-- Input field with datalist for suggestions -->
                             <input type="text" class="form-control input" id="customerNameName"
                                 placeholder="Enter Customer Name" list="customerSuggestions" autocomplete="off"
@@ -69,7 +70,7 @@
                             <datalist id="customerSuggestions"></datalist>
                         </div>
                         <div>
-                            <!-- <label for="address" class="form-label">Address :</label> -->
+                            <label for="address" class="form-label">Address :</label>
                             <!-- Input field with datalist for suggestions -->
                             <input type="text" class="form-control input" id="address" placeholder="Enter Address"
                                 list="customerSuggestions" autocomplete="off" maxlength="30" required>
@@ -79,14 +80,14 @@
 
 
                         <div>
-                            <!-- <label for="phoneNumber" class="form-label">Phone Number:</label> -->
+                            <label for="phoneNumber" class="form-label">Phone:</label>
                             <!-- Phone number field, editable if no matching customer is selected -->
                             <input type="tel" class="form-control input" id="phoneNumber"
                                 placeholder="Enter Phone Number" maxlength="10" required>
                         </div>
                         <!-- </div> -->
                         <div>
-                            <!-- <label for="gstin" class="form-label">GSTIN :</label> -->
+                            <label for="gstin" class="form-label">GSTIN :</label>
                             <!-- Phone number field, editable if no matching customer is selected -->
                             <input type="text" class="form-control input" id="gstin" placeholder="Enter GSTIN">
                         </div>
@@ -97,25 +98,25 @@
                         <!-- <div class="inputDiv"> -->
 
                         <div>
-                            <!-- <label for="vehicleno" class="form-label">Vehicle No:</label> -->
+                            <label for="vehicleno" class="form-label">Vehicle No:</label>
                             <input type="text" id="vehicleno" class="form-control input" placeholder="vehicle number"
                                 required>
 
                         </div>
                         <div>
-                            <!-- <label for="transmode" class="form-label">Transportation Mode:</label> -->
+                            <label for="transmode" class="form-label">Trans Mode:</label>
                             <input type="text" id="transmode" class="form-control input"
                                 placeholder="Transportation Mode" required>
 
                         </div>
                         <div>
-                            <!-- <label for="dlplace" class="form-label">Place of Delivery:</label> -->
+                            <label for="dlplace" class="form-label">Delivery:</label>
                             <input type="text" id="dlplace" class="form-control input" placeholder="Delivery Place"
                                 required>
 
                         </div>
                         <div>
-                            <!-- <label for="dlplace" class="form-label">Place of Delivery:</label> -->
+                            <label for="dlplace" class="form-label">State:</label>
                             <input type="text" id="state" class="form-control input" placeholder="State" required>
 
                         </div>
@@ -483,7 +484,7 @@
                     const state = document.getElementById("state").value.trim();
                     const gstin = document.getElementById("gstin").value.trim();
                     const transactionType = document.getElementById("transactionType").value.trim();
-                    console.log(transactionType);
+                    // console.log(transactionType);
 
                     const transactionMode = document.getElementById("transactionMode").value.trim();
                     const initialPayment = parseFloat(document.getElementById("initialPayment").value || "0");
@@ -896,7 +897,7 @@
         <td>
             <input type="text" class="item-name-input" list="item-name-suggestions" placeholder="Item Name">
             <datalist id="item-name-suggestions"></datalist>
-        </td>
+        </td> 
         <td><input type="number" class="qty-input" oninput="validateQty(this)"placeholder="Qty"></td>
         <td><input type="text" class="unit-input" placeholder="Unit" readonly></td>
         <td><input type="number" class="rate-input" placeholder="Rate"></td>
@@ -972,6 +973,9 @@
 
                 if (qty > stock) {
                     alert(`The entered quantity (${qty}) exceeds the available stock (${stock}).`);
+
+                    // Set the quantity input value to the stock value
+                    qtyInput.value = stock;
                 }
             };
 
@@ -1057,7 +1061,7 @@
                 const credtotal = parseFloat(document.getElementById("credtotal").textContent || "0");
                 const initialPaymentInput = document.getElementById('initialPayment').value;
 
-                const amount =parseFloat(unitPrice * quantity);
+                const amount = parseFloat(unitPrice * quantity);
                 amountCell.textContent = amount.toFixed(2);
 
                 calculateTotalAmount(); // Recalculate the total amount whenever values are updated
@@ -1118,7 +1122,7 @@
                     // Get SGST and CGST values from the row
                     const sgstValue = parseFloat(row.querySelector(".sgst").textContent) || 0;
                     // console.log("sgst value :",sgstValue);
-                    
+
                     const cgstValue = parseFloat(row.querySelector(".cgst").textContent) || 0;
 
                     // Accumulate SGST and CGST
@@ -1147,7 +1151,7 @@
                     gstCalaculate(row);
                     calculateTotalAmount();
                     calculateSubTotalAmount();
-                   
+
 
                 }
             });
@@ -1322,16 +1326,12 @@
             });
 
 
-            navigate.addEventListener("click", () => {
-                window.history.back();
-            });
-
             function home() {
 
                 window.open('./homePage.html', '_blank');
             }
             function newBill() {
-                window.open('./bill.html', '_blank');
+                window.open('./gstbill.html', '_blank');
 
             }
             function ledger() {
@@ -1340,11 +1340,27 @@
             }
             function customers() {
 
-                window.open('./customers.html', '_blank');
+                window.open('./gstcustomers.html', '_blank');
             }
             function inventory() {
 
                 window.open('./inventory.html', '_blank');
+            }
+            function debit() {
+
+                window.open('./debit.html', '_blank');
+            }
+            function overview() {
+
+                window.open('./overview.html', '_blank');
+            }
+            function notification() {
+
+                window.open('./gstnotification.html', '_blank');
+            }
+            function info() {
+
+                window.open('./info.html', '_blank');
             }
 
 
